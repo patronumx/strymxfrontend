@@ -433,11 +433,17 @@ export default function LiveMatchControl() {
         return p.health > 0;
     };
 
-    // Detect if the data is a stale "lobby reset" state where everyone was reset to alive
-    // This happens when the backend detects a new lobby and resets all players to health=100, liveState=0
+    // Calculate total combat activity to help detect if the match has actually started
+    const totalMatchKills = validPlayers.reduce((sum, p) => sum + (p.killNum || 0), 0);
+    const totalMatchDamage = validPlayers.reduce((sum, p) => sum + (p.damage || 0), 0);
+
+    // Detect if the data is a "lobby reset" or "waiting" state
+    // We treat it as a lobby if:
+    // 1. Data is stale (>30s) OR
+    // 2. Everyone is alive AND there has been ZERO combat (0 kills, 0 damage)
     const isDataStale = !lastUpdate || (Date.now() - lastUpdate) > 30000;
     const allPlayersIdenticalAliveState = validPlayers.length > 0 && validPlayers.every(p => (p.liveState === 0 || p.liveState === undefined || p.liveState === null));
-    const isLobbyResetState = isDataStale && allPlayersIdenticalAliveState;
+    const isLobbyResetState = isDataStale || (allPlayersIdenticalAliveState && totalMatchKills === 0 && totalMatchDamage === 0);
 
     // Log alive/dead diagnostic info
     if (validPlayers.length > 0) {
@@ -446,7 +452,7 @@ export default function LiveMatchControl() {
             acc[state] = (acc[state] || 0) + 1;
             return acc;
         }, {} as Record<string | number, number>);
-        console.log(`[STRYMX-KPI] Players: ${validPlayers.length} | liveState dist:`, liveStateCounts, `| Stale: ${isDataStale} | LobbyReset: ${isLobbyResetState}`);
+        console.log(`[STRYMX-KPI] Players: ${validPlayers.length} | Kills: ${totalMatchKills} | Dmg: ${totalMatchDamage} | Stale: ${isDataStale} | LobbyReset: ${isLobbyResetState}`);
     }
 
     const alivePlayers = isLobbyResetState ? 0 : validPlayers.filter(isPlayerAlive).length;
