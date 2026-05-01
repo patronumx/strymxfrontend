@@ -301,6 +301,17 @@ export default function MatchFraggersGraphicV2() {
 
     useEffect(() => {
         if (editMode) return;
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchId = urlParams.get('matchId') || 'pmtm-s4-match-1';
+
+        // Fetch initial data
+        fetch(`${API_URL}/api/match-state/${matchId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.activePlayers) setFetchedData(data.activePlayers);
+            })
+            .catch(err => console.warn("Initial fetch error:", err));
+
         const socket = io(WS_URL);
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);

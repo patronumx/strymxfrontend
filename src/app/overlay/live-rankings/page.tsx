@@ -45,6 +45,17 @@ export function LiveRankingsClassic({ designerMode = false }: { designerMode?: b
     }, []);
 
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchId = urlParams.get('matchId') || 'pmtm-s4-match-1';
+
+        // Fetch initial data
+        fetch(`${API_URL}/api/match-state/${matchId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.activePlayers) setFetchedData(data.activePlayers);
+            })
+            .catch(err => console.warn("Initial fetch error:", err));
+
         const socket = io(`${API_URL}`);
         socket.on('connect', () => console.log('Live Rankings connected to live data feed'));
         socket.on('match_state_update', (data) => {

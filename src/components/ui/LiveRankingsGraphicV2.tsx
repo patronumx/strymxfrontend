@@ -98,6 +98,17 @@ export default function LiveRankingsGraphicV2() {
     }, []);
 
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchId = urlParams.get('matchId') || 'pmtm-s4-match-1';
+
+        // Fetch initial data
+        fetch(`${API_URL}/api/match-state/${matchId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.activePlayers) handleUpdate(data);
+            })
+            .catch(err => console.warn("Initial fetch error:", err));
+
         const socket = io(WS_URL);
         socket.on('match_state_update', handleUpdate);
 
