@@ -1,5 +1,5 @@
 "use client"
-import { API_URL } from '@/lib/api-config';
+import { API_URL, WS_URL } from '@/lib/api-config';
 
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -219,7 +219,7 @@ export default function LiveMatchControl() {
     useEffect(() => {
         fetchDataForPersistence(); // Pre-fetch for the control bar
         
-        const backendUrl = `http://${window.location.hostname}:4000`;
+        const backendUrl = WS_URL;
         
         fetch(`${backendUrl}/api/match-state/test-match-001`)
             .then(res => res.json())
@@ -426,7 +426,7 @@ export default function LiveMatchControl() {
     };
 
     const fetchDataForPersistence = async () => {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || `http://${window.location.hostname}:4000`;
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || WS_URL;
         try {
             console.log(`[PERSISTENCE] Fetching from ${backendUrl}`);
             const mRes = await fetch(`${backendUrl}/api/matches`);
@@ -449,7 +449,7 @@ export default function LiveMatchControl() {
     const handleSaveToMatch = async () => {
         if (!selectedTargetMatch) return showNotification("Please select a target match.", 'error');
         setIsSaving(true);
-        const backendUrl = `http://${window.location.hostname}:4000`;
+        const backendUrl = WS_URL;
         try {
             const res = await fetch(`${backendUrl}/api/matches/${selectedTargetMatch}/save-live-data`, {
                 method: 'POST',

@@ -1,5 +1,5 @@
 "use client"
-import { API_URL } from '@/lib/api-config';
+import { API_URL , WS_URL} from '@/lib/api-config';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { io } from 'socket.io-client';
@@ -246,7 +246,7 @@ export default function OverallMvpGraphicV2() {
 
     useEffect(() => {
         if (editMode) return;
-        const socket = io(`http://${window.location.hostname}:4000`);
+        const socket = io(WS_URL);
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
         });

@@ -1,5 +1,5 @@
 "use client"
-import { API_URL } from '@/lib/api-config';
+import { API_URL , WS_URL} from '@/lib/api-config';
 
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -243,7 +243,7 @@ export default function MatchRankingGraphic({
             })
             .catch(console.error);
 
-        const socketUrl = `http://${window.location.hostname}:4000`;
+        const socketUrl = WS_URL;
         const socket = io(socketUrl, {
             transports: ['websocket'],
             reconnectionAttempts: 5

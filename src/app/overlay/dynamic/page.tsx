@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { io } from 'socket.io-client';
 import { useSearchParams } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
+import { WS_URL } from '@/lib/api-config';
 
 function DynamicOverlayEngine() {
     const { theme, isTransparent: themeTransparent, isDataOnly: themeDataOnly } = useTheme();
@@ -38,7 +39,7 @@ function DynamicOverlayEngine() {
 
     // 2. Telemetry Connection
     useEffect(() => {
-        const socket = io(`http://${window.location.hostname}:4000`);
+        const socket = io(WS_URL);
         socket.on('connect', () => console.log('Dynamic Engine Connected'));
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);

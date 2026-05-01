@@ -1,4 +1,5 @@
 "use client"
+import { WS_URL } from '@/lib/api-config';
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useTheme } from '@/context/ThemeContext';
@@ -36,7 +37,7 @@ export default function MatchSummaryClassic() {
     }, []);
 
     useEffect(() => {
-        const socket = io(`http://${window.location.hostname}:4000`);
+        const socket = io(WS_URL);
         socket.on('connect', () => console.log('Match Summary (Classic) connected'));
         socket.on('match_state_update', handleUpdate);
         return () => { socket.disconnect(); };

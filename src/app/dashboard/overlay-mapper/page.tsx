@@ -1,4 +1,5 @@
 "use client"
+import { WS_URL } from '@/lib/api-config';
 import React, { useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { Save, Plus, Type, Image as ImageIcon, Send, LayoutGrid, Trash2, CheckCircle2, Copy, X } from 'lucide-react';

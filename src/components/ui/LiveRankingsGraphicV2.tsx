@@ -1,5 +1,5 @@
 "use client"
-import { API_URL } from '@/lib/api-config';
+import { API_URL , WS_URL} from '@/lib/api-config';
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
@@ -98,7 +98,7 @@ export default function LiveRankingsGraphicV2() {
     }, []);
 
     useEffect(() => {
-        const socket = io(`http://${window.location.hostname}:4000`);
+        const socket = io(WS_URL);
         socket.on('match_state_update', handleUpdate);
 
         socket.on('layout_push', (data: { overlayKey: string; layout: Record<string, any> }) => {

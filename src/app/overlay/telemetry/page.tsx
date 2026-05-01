@@ -1,12 +1,13 @@
 "use client"
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { io } from 'socket.io-client';
+import { WS_URL } from '@/lib/api-config';
 
 function PureTelemetryContent() {
     const [fetchedData, setFetchedData] = useState<any[]>([]);
 
     useEffect(() => {
-        const socket = io(`http://${window.location.hostname}:4000`);
+        const socket = io(WS_URL);
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
         });

@@ -1,5 +1,5 @@
 "use client"
-import { API_URL } from '@/lib/api-config';
+import { API_URL , WS_URL} from '@/lib/api-config';
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { io } from 'socket.io-client';
@@ -254,7 +254,7 @@ export default function RoadToMvpPremium() {
         fetchData();
         const interval = setInterval(fetchData, 30000);
         
-        const socket = io(`http://${window.location.hostname}:4000`);
+        const socket = io(WS_URL);
         socket.on('layout_push', (data: { overlayKey: string; layout: Record<string, any> }) => {
             if (data.overlayKey !== OVERLAY_KEY) return;
             Object.entries(data.layout).forEach(([id, config]) => { try { localStorage.setItem(`strymx_layout:${OVERLAY_KEY}:${id}`, JSON.stringify(config)); } catch {} });

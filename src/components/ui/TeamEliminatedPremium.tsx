@@ -1,5 +1,5 @@
 "use client"
-import { API_URL } from '@/lib/api-config';
+import { API_URL , WS_URL} from '@/lib/api-config';
 
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
@@ -67,7 +67,7 @@ export default function TeamEliminatedPremium() {
 
     useEffect(() => {
         if (editMode) return;
-        const socket = io(`http://${window.location.hostname}:4000`);
+        const socket = io(WS_URL);
         socket.on('graphic_command', (cmd) => {
             if (cmd.templateUrl === '/overlays/team-eliminated' && cmd.action === 'PLAY') {
                 setTeam(cmd.data); setIsVisible(true);

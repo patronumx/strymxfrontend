@@ -1,5 +1,5 @@
 "use client"
-import { API_URL } from '@/lib/api-config';
+import { API_URL , WS_URL} from '@/lib/api-config';
 
 
 import React, { useEffect, useState } from 'react';
@@ -129,7 +129,7 @@ export default function WWCDStatsGraphic({ matchId = "test-match-001" }: { match
             .then(data => { if (data.activePlayers) processData(data.activePlayers, data.matchInfo); })
             .catch(console.error);
 
-        const socketUrl = `http://${window.location.hostname}:4000`;
+        const socketUrl = WS_URL;
         const socket = io(socketUrl, {
             transports: ['websocket'],
             reconnectionAttempts: 5
