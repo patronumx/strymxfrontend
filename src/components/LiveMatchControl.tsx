@@ -135,6 +135,50 @@ export default function LiveMatchControl() {
         }, 5000);
     };
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+    const [persistentRoster, setPersistentRoster] = useState<Map<string, PlayerStat>>(new Map());
+
+    // Update Persistent Roster Registry whenever socket players change
+    useEffect(() => {
+        if (players.length === 0) return;
+        
+        setPersistentRoster(prev => {
+            const next = new Map(prev);
+            players.forEach(p => {
+                const pk = p.playerKey || (p as any).PlayerKey;
+                if (!pk) return;
+                
+                const isUnknown = !p.name || p.name === 'Unknown' || p.name === '-';
+                const hasNoStats = (p.killNum || 0) === 0 && (p.damage || 0) === 0;
+                
+                // Skip placeholder ghosts unless they are already in the roster
+                if (isUnknown && hasNoStats && !next.has(pk)) return;
+                
+                const existing = next.get(pk);
+                if (!existing) {
+                    next.set(pk, p);
+                } else {
+                    const existingIsUnknown = !existing.name || existing.name === 'Unknown' || existing.name === '-';
+                    
+                    // If we now have a real name, prioritize it
+                    if (existingIsUnknown && !isUnknown) {
+                        next.set(pk, { ...existing, ...p });
+                    } else {
+                        // Merge stats, taking the maximums for cumulative metrics to handle partial packets
+                        next.set(pk, {
+                            ...existing,
+                            ...p,
+                            killNum: Math.max(existing.killNum || 0, p.killNum || 0),
+                            damage: Math.max(existing.damage || 0, p.damage || 0),
+                            health: p.health !== undefined ? p.health : existing.health,
+                            liveState: p.liveState !== undefined ? p.liveState : existing.liveState
+                        });
+                    }
+                }
+            });
+            return next;
+        });
+    }, [players]);
+
 
     // Backup Mode
     const [backupMode, setBackupMode] = useState(false);
@@ -335,31 +379,11 @@ export default function LiveMatchControl() {
             if (slotA !== slotB) return slotA - slotB;
             return a.name.localeCompare(b.name);
         });
-    }, [players]);
+    }, [validPlayers]);
 
     const validPlayers = React.useMemo(() => {
-        const uniquePlayerMap = new Map<string, any>();
-        players.forEach(p => {
-            const existing = uniquePlayerMap.get(p.playerKey);
-            if (!existing) {
-                uniquePlayerMap.set(p.playerKey, p);
-            } else {
-                // Keep whichever version has more recent/complete data
-                if ((p.killNum ?? 0) >= (existing.killNum ?? 0) &&
-                    (p.damage ?? 0) >= (existing.damage ?? 0)) {
-                    uniquePlayerMap.set(p.playerKey, p);
-                }
-            }
-        });
-
-        return Array.from(uniquePlayerMap.values()).filter(p => {
-            // Drop placeholder players with no stats
-            const isUnknown = !p.name || p.name === 'Unknown' || p.name === '-';
-            const hasNoStats = (p.killNum || 0) === 0 && (p.damage || 0) === 0;
-            if (isUnknown && hasNoStats) return false;
-            return true;
-        });
-    }, [players]);
+        return Array.from(persistentRoster.values());
+    }, [persistentRoster]);
 
     const matchSummaryStats = React.useMemo(() => {
         const stats = {
@@ -385,10 +409,15 @@ export default function LiveMatchControl() {
         return stats;
     }, [validPlayers]);
 
-    const alivePlayers = validPlayers.filter(p => p.health > 0).length;
-    const deadPlayers = validPlayers.filter(p => p.health <= 0).length;
+    const isPlayerAlive = (p: PlayerStat) => {
+        if (p.liveState !== undefined) return p.liveState < 2;
+        return p.health > 0;
+    };
+
+    const alivePlayers = validPlayers.filter(isPlayerAlive).length;
+    const deadPlayers = validPlayers.filter(p => !isPlayerAlive(p)).length;
     // Group by both ID and Name to ensure unique team counting even with placeholder names
-    const activeTeams = new Set(validPlayers.filter(p => p.health > 0).map(p => `${p.teamId}-${p.teamName}`)).size;
+    const activeTeams = new Set(validPlayers.filter(isPlayerAlive).map(p => `${p.teamId}-${p.teamName}`)).size;
     const topDamageLeaders = [...validPlayers]
         .sort((a, b) => {
             if (b.killNum !== a.killNum) {
@@ -469,6 +498,7 @@ export default function LiveMatchControl() {
             console.log('Reset successful');
             localStorage.removeItem('strymx_team_slots'); // Clear team slot order for fresh match
             setPlayers([]); // Optimistically clear frontend
+            setPersistentRoster(new Map()); // CLEAR THE PERMANENT ROSTER
             setIsResetModalOpen(false);
             showNotification('Match reset successfully!', 'success');
         } catch (e: any) {
