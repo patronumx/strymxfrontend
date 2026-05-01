@@ -21,8 +21,11 @@ export default function TeamStatusOverlay() {
     const [players, setPlayers] = useState<PlayerStat[]>([]);
 
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchId = urlParams.get('matchId') || 'pmtm-s4-match-1';
+
         // Fetch initial state for OBS
-        fetch(`${API_URL}/api/match-state/test-match-001`)
+        fetch(`${API_URL}/api/match-state/${matchId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.activePlayers && data.activePlayers.length > 0) {
