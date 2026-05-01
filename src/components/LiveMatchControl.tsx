@@ -1,5 +1,6 @@
-import { API_URL } from '@/lib/api-config';
 "use client"
+import { API_URL } from '@/lib/api-config';
+
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { io, Socket } from 'socket.io-client';

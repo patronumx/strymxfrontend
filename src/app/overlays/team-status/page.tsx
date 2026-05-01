@@ -1,5 +1,6 @@
-import { API_URL } from '@/lib/api-config';
 "use client"
+import { API_URL } from '@/lib/api-config';
+
 
 import React, { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';

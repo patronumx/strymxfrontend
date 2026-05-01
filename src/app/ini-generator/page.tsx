@@ -1,5 +1,5 @@
-import { API_URL } from '@/lib/api-config';
 "use client"
+import { API_URL } from '@/lib/api-config';
 
 import React, { useState, useRef, useCallback } from 'react';
 import { removeBackground, Config } from "@imgly/background-removal";

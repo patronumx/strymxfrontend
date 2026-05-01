@@ -1,5 +1,6 @@
-import { API_URL } from '@/lib/api-config';
 "use client"
+import { API_URL } from '@/lib/api-config';
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, UserPlus, Shield, Trash2, Edit2, Search, PlusCircle, Save, X, Globe, Upload, Image, Wand2, RefreshCcw } from 'lucide-react';

@@ -1,5 +1,6 @@
-import { API_URL } from '@/lib/api-config';
 "use client"
+import { API_URL } from '@/lib/api-config';
+
 
 import React, { useState } from 'react';
 import { Play, Square, Zap, Package, Trophy, User } from 'lucide-react';

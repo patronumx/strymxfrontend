@@ -1,5 +1,5 @@
-import { API_URL } from '@/lib/api-config';
 "use client"
+import { API_URL } from '@/lib/api-config';
 import React, { useState, useEffect } from 'react';
 import { Save, Layers, Palette, Search, Plus, Code, Image as ImageIcon, Trash2, CheckCircle2, ChevronRight, X, MousePointer2, Eye, EyeOff } from 'lucide-react';
 import { Rnd } from 'react-rnd';

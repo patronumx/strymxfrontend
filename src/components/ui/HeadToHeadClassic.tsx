@@ -1,5 +1,6 @@
-import { API_URL } from '@/lib/api-config';
 "use client"
+import { API_URL } from '@/lib/api-config';
+
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { io } from 'socket.io-client';
 import { Swords, Target, TrendingUp, Clock, Award } from 'lucide-react';
