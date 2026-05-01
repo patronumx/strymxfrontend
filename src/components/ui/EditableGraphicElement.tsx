@@ -20,6 +20,7 @@ export interface ElementStyle {
     gradientEnd?: string;
     textColor?: string;
     borderColor?: string;
+    accentColor?: string;
     shadowColor?: string;
     glowColor?: string;
     // Typography
