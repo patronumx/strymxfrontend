@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -42,7 +43,7 @@ export default function RecallAnimationGraphic() {
     }, []);
 
     useEffect(() => {
-        const socket = io(`http://localhost:4000`);
+        const socket = io(`${API_URL}`);
         socket.on('graphic_command', (cmd) => {
             if (cmd.templateUrl === '/overlays/recall') {
                 if (cmd.action === 'PLAY') {
@@ -139,7 +140,7 @@ export default function RecallAnimationGraphic() {
                                     }}
                                 >
                                     <img
-                                        src={player.photoUrl || `http://localhost:4000/images/${player.playerKey}.png`}
+                                        src={player.photoUrl || `${API_URL}/images/${player.playerKey}.png`}
                                         onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                                         style={{
                                             width: '100%', height: '100%',
@@ -187,7 +188,7 @@ export default function RecallAnimationGraphic() {
                                         }}
                                     >
                                         <img
-                                            src={player.logoUrl || 'http://localhost:4000/placeholder-logo.png'}
+                                            src={player.logoUrl || `${API_URL}/placeholder-logo.png`}
                                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                             alt=""
                                         />

@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, Suspense } from 'react';
 import { io } from 'socket.io-client';
@@ -44,7 +45,7 @@ export function LiveRankingsClassic({ designerMode = false }: { designerMode?: b
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('connect', () => console.log('Live Rankings connected to live data feed'));
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
@@ -191,8 +192,8 @@ export function LiveRankingsClassic({ designerMode = false }: { designerMode?: b
                         {topPlayers.slice(0, 4).map((p: any, idx: number) => (
                             <div key={idx} className="relative bg-slate-700 overflow-hidden">
                                 <img
-                                    src={`http://localhost:4000/images/${p.playerKey}.png`}
-                                    onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; }}
+                                    src={`${API_URL}/images/${p.playerKey}.png`}
+                                    onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; }}
                                     className="w-full h-full object-cover object-top opacity-90"
                                     alt=""
                                 />

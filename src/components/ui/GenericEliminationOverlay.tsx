@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -99,13 +100,13 @@ const DEFAULT_LAYOUT = {
 
 function PlayerPortrait({ photoUrl, playerKey, name }: { photoUrl?: string; playerKey: string; name: string }) {
     const [imgSrc, setImgSrc] = useState<string | null>(
-        photoUrl || (playerKey ? `http://localhost:4000/images/${playerKey}.png` : null)
+        photoUrl || (playerKey ? `${API_URL}/images/${playerKey}.png` : null)
     );
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey) {
-            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/images/${playerKey}.png`);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -116,7 +117,7 @@ function PlayerPortrait({ photoUrl, playerKey, name }: { photoUrl?: string; play
                 <img
                     src={imgSrc}
                     onError={() => {
-                        if (imgSrc?.includes(':3000')) setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+                        if (imgSrc?.includes(':3000')) setImgSrc(`${API_URL}/images/${playerKey}.png`);
                         else setFailed(true);
                     }}
                     style={{
@@ -219,7 +220,7 @@ export default function GenericEliminationOverlay({ config }: { config: Eliminat
 
     useEffect(() => {
         if (editMode) return;
-        const socket = io(`http://localhost:4000`);
+        const socket = io(`${API_URL}`);
         socket.on('graphic_command', (cmd) => {
             if (cmd.templateUrl === config.templateUrl) {
                 if (cmd.action === 'PLAY') {
@@ -417,7 +418,7 @@ export default function GenericEliminationOverlay({ config }: { config: Eliminat
                                     border: `${style.borderWidth ?? 2}px solid ${style.borderColor || 'rgba(255,255,255,0.5)'}`,
                                     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                                 }}>
-                                    <img src={player.logoUrl || 'http://localhost:4000/placeholder-logo.png'}
+                                    <img src={player.logoUrl || `${API_URL}/placeholder-logo.png`}
                                         alt={player.teamName}
                                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                         onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}

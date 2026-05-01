@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -39,7 +40,7 @@ function GlassPanel({ style }: { style: ElementStyle }) {
 function PhotoBlock({ data }: { data: PlayerData }) {
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-            <img src={data.photoUrl || `http://localhost:4000/images/${data.playerKey}.png`} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            <img src={data.photoUrl || `${API_URL}/images/${data.playerKey}.png`} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom', filter: 'drop-shadow(0 0 30px #06b6d460) drop-shadow(0 10px 30px rgba(0,0,0,0.5))' }} alt={data.name} />
         </div>
     );
@@ -48,7 +49,7 @@ function PhotoBlock({ data }: { data: PlayerData }) {
 function LogoBlock({ data, style }: { data: PlayerData; style: ElementStyle }) {
     return (
         <div style={{ width: '100%', height: '100%', borderRadius: style.borderRadius ?? 14, background: `${style.bgColor || '#06b6d4'}20`, border: `2px solid ${style.borderColor || '#06b6d4'}50`, padding: 8, boxShadow: `0 0 30px ${style.bgColor || '#06b6d4'}30` }}>
-            <img src={data.logoUrl || 'http://localhost:4000/placeholder-logo.png'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
+            <img src={data.logoUrl || `${API_URL}/placeholder-logo.png`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
         </div>
     );
 }
@@ -121,7 +122,7 @@ export default function RecallV2() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'rc-canvas-bounds';
     const comps: Record<string, React.FC<any>> = { [BLOCK_IDS.glassPanel]: GlassPanel, [BLOCK_IDS.photo]: PhotoBlock, [BLOCK_IDS.logo]: LogoBlock, [BLOCK_IDS.titleText]: TitleText, [BLOCK_IDS.nameText]: NameText, [BLOCK_IDS.teamBar]: TeamBar };

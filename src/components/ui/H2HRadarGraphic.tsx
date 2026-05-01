@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { io } from 'socket.io-client';
@@ -326,7 +327,7 @@ function H2HRadarContent() {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('match_state_update', (data) => {
             if (data?.activePlayers) setFetchedData(data.activePlayers);
         });

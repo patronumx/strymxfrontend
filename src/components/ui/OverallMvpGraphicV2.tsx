@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -122,7 +123,7 @@ function MvpRowCard({ rank, player, style }: { rank: number; player: PlayerStat;
             }}>
                 <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 10, background: '#a3e635' }} />
                 <img
-                    src={`http://localhost:4000/images/${player.playerKey}.png`}
+                    src={`${API_URL}/images/${player.playerKey}.png`}
                     onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     style={{ height: '140%', width: 'auto', objectFit: 'contain', marginTop: 40 }}
                     alt={player.name}
@@ -332,7 +333,7 @@ export default function OverallMvpGraphicV2() {
             }
         }
         try {
-            const res = await fetch('http://localhost:4000/api/layouts/push', {
+            const res = await fetch(`${API_URL}/api/layouts/push`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }),

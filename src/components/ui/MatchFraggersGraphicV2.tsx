@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
@@ -141,7 +142,7 @@ function FraggerRowCard({ rank, player, style }: { rank: number; player: PlayerS
                 position: 'relative', overflow: 'hidden',
             }}>
                 <img
-                    src={`http://localhost:4000/images/${player.playerKey}.png`}
+                    src={`${API_URL}/images/${player.playerKey}.png`}
                     onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     style={{
                         height: '140%', width: 'auto', objectFit: 'contain',
@@ -398,7 +399,7 @@ export default function MatchFraggersGraphicV2() {
             }
         }
         try {
-            const res = await fetch('http://localhost:4000/api/layouts/push', {
+            const res = await fetch(`${API_URL}/api/layouts/push`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }),

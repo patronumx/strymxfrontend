@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -34,7 +35,7 @@ export default function RamadanTopFraggersListGraphic() {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
 
         socket.on('graphic_command', (cmd: GraphicCommand) => {
             if (cmd.templateUrl?.includes('/overlays/top-fraggers-list')) {

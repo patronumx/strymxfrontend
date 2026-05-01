@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { io } from 'socket.io-client';
@@ -28,7 +29,7 @@ function PlayerPortrait({ photoUrl, playerKey, name, backendHost, themeColor, fl
     flipped: boolean;
 }) {
     const [imgSrc, setImgSrc] = useState<string | null>(
-        photoUrl || (playerKey && !playerKey.startsWith('dummy') ? `http://localhost:4000/images/${playerKey}.png` : null)
+        photoUrl || (playerKey && !playerKey.startsWith('dummy') ? `${API_URL}/images/${playerKey}.png` : null)
     );
     const [failed, setFailed] = useState(false);
 
@@ -36,7 +37,7 @@ function PlayerPortrait({ photoUrl, playerKey, name, backendHost, themeColor, fl
     useEffect(() => {
         if (!photoUrl && playerKey && !playerKey.startsWith('dummy')) {
             // Try port 3000 first (dedicated getplayer service)
-            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/images/${playerKey}.png`);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -115,7 +116,7 @@ function HeadToHeadContent() {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('connect', () => console.log('Head to Head connected'));
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);

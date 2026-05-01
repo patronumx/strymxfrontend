@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -51,12 +52,12 @@ export default function MVPGraphic({ matchId = "test-match-001" }: { matchId?: s
             }
         };
 
-        fetch(`http://localhost:4000/api/match-state/${matchId}`)
+        fetch(`${API_URL}/api/match-state/${matchId}`)
             .then(res => res.json())
             .then(data => { if (data.activePlayers) processData(data.activePlayers); })
             .catch(console.error);
 
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('match_state_update', (data) => {
             if (data.activePlayers) processData(data.activePlayers);
         });
@@ -134,7 +135,7 @@ export default function MVPGraphic({ matchId = "test-match-001" }: { matchId?: s
                         transition={{ delay: 0.5, type: 'spring', damping: 25 }}
                         className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[950px] w-[900px] flex items-end justify-center z-10">
                         {mvp.photoUrl ? (
-                            <img src={`http://localhost:4000${mvp.photoUrl}`} className="h-full object-cover object-bottom filter drop-shadow-2xl" alt={mvp.name} />
+                            <img src={`${API_URL}${mvp.photoUrl}`} className="h-full object-cover object-bottom filter drop-shadow-2xl" alt={mvp.name} />
                         ) : (
                             <div className="w-[600px] h-[800px] bg-slate-200 rounded-t-[300px] border-[12px] border-white flex items-center justify-center shadow-2xl">
                                 <span className="text-[300px] text-slate-400 font-black">{mvp.name?.charAt(0)}</span>
@@ -152,7 +153,7 @@ export default function MVPGraphic({ matchId = "test-match-001" }: { matchId?: s
                             transition={{ delay: 0.7, type: 'spring', damping: 20 }}
                             className="flex items-center gap-8 mb-20 bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-3xl w-full"
                         >
-                            <img src={mvp.logoUrl?.replace('http:', 'http://localhost:4000')} onError={(e) => e.currentTarget.style.display = 'none'} className="h-28 object-contain filter drop-shadow-2xl" alt="" />
+                            <img src={mvp.logoUrl?.replace('http:', `${API_URL}`)} onError={(e) => e.currentTarget.style.display = 'none'} className="h-28 object-contain filter drop-shadow-2xl" alt="" />
                             <div className="flex flex-col">
                                 <span className="text-xl font-black uppercase tracking-widest mb-1" style={{ color: theme.secondary }}>{mvp.teamName}</span>
                                 <span 

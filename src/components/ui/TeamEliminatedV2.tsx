@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -44,7 +45,7 @@ function LogoBlock({ data, style }: { data: TeamData; style: ElementStyle }) {
     return (
         <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${style.bgColor || '#1a2340'}, #1e2746)`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 10 }}>
             <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={data.logoUrl || 'http://localhost:4000/placeholder-logo.png'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
+                <img src={data.logoUrl || `${API_URL}/placeholder-logo.png`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
             </div>
             {data.flagUrl && <img src={data.flagUrl} style={{ width: 28, height: 18, objectFit: 'cover', borderRadius: 3, border: '1px solid rgba(255,255,255,0.2)' }} alt="" />}
         </div>
@@ -113,7 +114,7 @@ export default function TeamEliminatedV2() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'te-canvas-bounds';
 

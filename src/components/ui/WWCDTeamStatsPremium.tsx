@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -70,7 +71,7 @@ const DEFAULTS: Record<string, { transform: ElementTransform; style: ElementStyl
 };
 
 function PlayerPortrait({ playerKey, photoUrl, failed, setFailed }: { playerKey: string, photoUrl?: string, failed: boolean, setFailed: (v: boolean) => void }) {
-    const imgSrc = photoUrl || (playerKey && !playerKey.startsWith('pad') ? `http://localhost:4000/images/${playerKey}.png` : null);
+    const imgSrc = photoUrl || (playerKey && !playerKey.startsWith('pad') ? `${API_URL}/images/${playerKey}.png` : null);
     if (failed || !imgSrc) return <div className="w-full h-full bg-black/20 flex items-center justify-center"><span className="text-white/10 text-9xl font-black">?</span></div>;
     return <img src={imgSrc} onError={() => setFailed(true)} className="w-full h-full object-cover object-bottom" alt="" />;
 }
@@ -230,7 +231,7 @@ export default function WWCDTeamStatsPremium() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'wwcd-premium-canvas';
 

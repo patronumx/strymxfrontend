@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -29,7 +30,7 @@ export default function SheetDataManager() {
 
     const fetchStatus = useCallback(async () => {
         try {
-            const res = await fetch('http://localhost:4000/api/sheets/status');
+            const res = await fetch(`${API_URL}/api/sheets/status`);
             if (res.ok) {
                 const data = await res.json();
                 setStatus(data);
@@ -51,7 +52,7 @@ export default function SheetDataManager() {
         }
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:4000/api/sheets/connect', {
+            const res = await fetch(`${API_URL}/api/sheets/connect`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: sheetUrl, pollInterval: pollInterval * 1000 }),
@@ -73,7 +74,7 @@ export default function SheetDataManager() {
     const handleDisconnect = async () => {
         setLoading(true);
         try {
-            await fetch('http://localhost:4000/api/sheets/disconnect', { method: 'POST' });
+            await fetch(`${API_URL}/api/sheets/disconnect`, { method: 'POST' });
             setMessage({ text: 'Disconnected from Google Sheet', type: 'info' });
             fetchStatus();
         } catch {

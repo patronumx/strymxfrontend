@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -145,13 +146,13 @@ export default function LiveMatchControl() {
     useEffect(() => {
         const checkStatus = async () => {
             try {
-                const res = await fetch('http://localhost:4000/api/backup-mode/status');
+                const res = await fetch(`${API_URL}/api/backup-mode/status`);
                 const data = await res.json();
                 setBackupMode(data.backupMode);
                 if (data.sheetStatus?.url) setBackupSheetUrl(data.sheetStatus.url);
             } catch {}
             try {
-                const res = await fetch('http://localhost:4000/api/pcob/status');
+                const res = await fetch(`${API_URL}/api/pcob/status`);
                 const data = await res.json();
                 setPcobReachable(data.reachable);
             } catch { setPcobReachable(false); }
@@ -168,7 +169,7 @@ export default function LiveMatchControl() {
         }
         setBackupLoading(true);
         try {
-            const res = await fetch('http://localhost:4000/api/backup-mode/toggle', {
+            const res = await fetch(`${API_URL}/api/backup-mode/toggle`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -401,8 +402,8 @@ export default function LiveMatchControl() {
 
     const handleResetMatch = async () => {
         try {
-            console.log('Attempting to reset match at http://localhost:4000/api/agent/reset...');
-            const response = await fetch('http://localhost:4000/api/agent/reset', {
+            console.log('Attempting to reset match at ${API_URL}/api/agent/reset...');
+            const response = await fetch(`${API_URL}/api/agent/reset`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ matchId: 'test-match-001' })
@@ -1049,7 +1050,7 @@ export default function LiveMatchControl() {
                                     <span className="text-6xl font-black text-emerald-500 italic">#1</span>
                                     <div className="relative">
                                         <img 
-                                            src={teamRankings[0].logoUrl || 'http://localhost:4000/images/default.png'} 
+                                            src={teamRankings[0].logoUrl || `${API_URL}/images/default.png`} 
                                             className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]" 
                                             alt="" 
                                         />
@@ -1124,7 +1125,7 @@ export default function LiveMatchControl() {
                                                             <div className="w-12 font-black text-slate-400 group-hover:text-emerald-500 transition-colors">#{rank}</div>
                                                             <div className="flex-1 flex items-center gap-3">
                                                                 <img 
-                                                                    src={team.logoUrl || 'http://localhost:4000/images/default.png'} 
+                                                                    src={team.logoUrl || `${API_URL}/images/default.png`} 
                                                                     className="w-6 h-6 object-contain" 
                                                                     alt="" 
                                                                 />
@@ -1323,7 +1324,7 @@ export default function LiveMatchControl() {
                             {teamRankings.slice(0, 18).map((team, idx) => (
                                 <div key={team.name || idx} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-800/50">
                                     <span className="text-lg font-black text-orange-400 w-8">#{idx + 1}</span>
-                                    <img src={team.logoUrl || 'http://localhost:4000/images/default.png'} className="w-6 h-6 object-contain" alt="" />
+                                    <img src={team.logoUrl || `${API_URL}/images/default.png`} className="w-6 h-6 object-contain" alt="" />
                                     <span className="font-bold text-slate-200 uppercase tracking-tighter text-sm flex-1 truncate">{team.name}</span>
                                     <div className="flex gap-4 text-xs">
                                         <span className="text-slate-400 font-bold">{team.totalPts} <span className="text-slate-600">pts</span></span>
@@ -1560,7 +1561,7 @@ export default function LiveMatchControl() {
                                             >
                                                 <div className="relative w-10 h-10 shrink-0 rounded-lg bg-slate-800/60 border border-slate-700/60 overflow-hidden">
                                                     <img
-                                                        src={p.photoUrl || `http://localhost:4000/images/${p.playerKey}.png`}
+                                                        src={p.photoUrl || `${API_URL}/images/${p.playerKey}.png`}
                                                         alt={p.name}
                                                         className="w-full h-full object-cover"
                                                         onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
@@ -1576,7 +1577,7 @@ export default function LiveMatchControl() {
                                                 <button
                                                     onClick={async () => {
                                                         try {
-                                                            const res = await fetch('http://localhost:4000/api/graphics/command', {
+                                                            const res = await fetch(`${API_URL}/api/graphics/command`, {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({
@@ -1698,8 +1699,8 @@ export default function LiveMatchControl() {
                                     <div className="w-8 text-center font-black text-slate-700 group-hover:text-rose-500/70 transition-colors text-xl">#{idx + 1}</div>
                                     <div className="relative shrink-0">
                                         <img
-                                            src={`http://localhost:4000/images/${player.playerKey}.png`}
-                                            onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; e.currentTarget.onerror = null; }}
+                                            src={`${API_URL}/images/${player.playerKey}.png`}
+                                            onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; e.currentTarget.onerror = null; }}
                                             alt=""
                                             className="w-16 h-16 rounded-full object-cover border-2 border-slate-700 shadow-lg group-hover:border-rose-500 transition-colors"
                                         />
@@ -1782,8 +1783,8 @@ export default function LiveMatchControl() {
                                     <div className="w-8 text-center font-black text-rose-500/70 text-xl">#1</div>
                                     <div className="relative shrink-0">
                                         <img
-                                            src={`http://localhost:4000/images/${topDamageLeaders[0].playerKey}.png`}
-                                            onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; e.currentTarget.onerror = null; }}
+                                            src={`${API_URL}/images/${topDamageLeaders[0].playerKey}.png`}
+                                            onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; e.currentTarget.onerror = null; }}
                                             alt=""
                                             className="w-16 h-16 rounded-full object-cover border-2 border-rose-500 shadow-lg"
                                         />
@@ -1893,8 +1894,8 @@ export default function LiveMatchControl() {
                                     <div className="w-8 text-center font-black text-slate-700 group-hover:text-emerald-500/70 transition-colors text-xl">#{idx + 1}</div>
                                     <div className="relative shrink-0">
                                         <img
-                                            src={`http://localhost:4000/images/${player.playerKey}.png`}
-                                            onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; e.currentTarget.onerror = null; }}
+                                            src={`${API_URL}/images/${player.playerKey}.png`}
+                                            onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; e.currentTarget.onerror = null; }}
                                             alt=""
                                             className="w-16 h-16 rounded-full object-cover border-2 border-slate-700 shadow-lg group-hover:border-emerald-500 transition-colors"
                                         />
@@ -1990,8 +1991,8 @@ export default function LiveMatchControl() {
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-full pointer-events-none group-hover:bg-amber-500/10 transition-colors"></div>
                                     <div className="relative z-10">
                                         <img
-                                            src={`http://localhost:4000/images/${player.playerKey}.png`}
-                                            onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; e.currentTarget.onerror = null; }}
+                                            src={`${API_URL}/images/${player.playerKey}.png`}
+                                            onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; e.currentTarget.onerror = null; }}
                                             alt=""
                                             className="w-14 h-14 rounded-full object-cover border-2 border-slate-700/50 shadow-md group-hover:border-amber-500/50 transition-colors bg-slate-800"
                                         />
@@ -2090,8 +2091,8 @@ export default function LiveMatchControl() {
                         >
                             <div className="relative mb-6 flex justify-center">
                                 <img 
-                                    src={`http://localhost:4000/images/${headToHeadPlayers[0].playerKey}.png`} 
-                                    onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; e.currentTarget.onerror = null; }}
+                                    src={`${API_URL}/images/${headToHeadPlayers[0].playerKey}.png`} 
+                                    onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; e.currentTarget.onerror = null; }}
                                     className="h-[400px] w-auto object-contain relative z-10 drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]" 
                                     alt="" 
                                 />

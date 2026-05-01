@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
@@ -75,16 +76,16 @@ const MOCK_MVP: PlayerStat = {
     survivalTime: 1145,
     teamContri: '34.50%',
     photoUrl: '',
-    logoUrl: 'http://localhost:4000/placeholder.png'
+    logoUrl: `${API_URL}/placeholder.png`
 };
 
 function PlayerPortrait({ photoUrl, playerKey, name }: { photoUrl?: string; playerKey: string; name: string }) {
-    const [imgSrc, setImgSrc] = useState<string | null>(photoUrl || (playerKey ? `http://localhost:4000/images/${playerKey}.png` : null));
+    const [imgSrc, setImgSrc] = useState<string | null>(photoUrl || (playerKey ? `${API_URL}/images/${playerKey}.png` : null));
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey) {
-            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/images/${playerKey}.png`);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -96,7 +97,7 @@ function PlayerPortrait({ photoUrl, playerKey, name }: { photoUrl?: string; play
                     src={imgSrc} 
                     onError={() => {
                         if (imgSrc?.includes(':3000')) {
-                            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+                            setImgSrc(`${API_URL}/images/${playerKey}.png`);
                         } else {
                             setFailed(true);
                         }
@@ -150,7 +151,7 @@ function PlayerInfoBlock({ player, style }: { player: PlayerStat, style: Element
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'stretch' }}>
             <div style={{ width: 80, backgroundColor: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10 }}>
-                <img src={player.logoUrl?.replace('http:', 'http://localhost:4000')} onError={(e) => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
+                <img src={player.logoUrl?.replace('http:', `${API_URL}`)} onError={(e) => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
             </div>
             <div style={{ flex: 1, backgroundColor: bg, display: 'flex', alignItems: 'center', padding: '0 30px' }}>
                 <span style={{ fontSize: style.fontSize || 48, fontWeight: 900, color: textColor, fontFamily: font?.family, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -237,7 +238,7 @@ export default function MatchMvpPremium() {
 
     useEffect(() => {
         if (editMode) return;
-        fetch(`http://localhost:4000/api/match-state/test-match-001`)
+        fetch(`${API_URL}/api/match-state/test-match-001`)
             .then(res => res.json())
             .then(data => { if (data.activePlayers) processData(data.activePlayers, data.matchInfo); })
             .catch(console.error);
@@ -263,7 +264,7 @@ export default function MatchMvpPremium() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'mvp-canvas-bounds';
 

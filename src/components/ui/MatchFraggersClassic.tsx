@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
@@ -55,7 +56,7 @@ export default function MatchFraggersClassic() {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('connect', () => console.log('Match Fraggers (Classic) connected'));
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
@@ -159,8 +160,8 @@ export default function MatchFraggersClassic() {
                                 <div className="relative w-44 h-full flex items-center justify-center overflow-hidden">
                                     <div className="absolute inset-x-4 bottom-4 top-10 bg-theme-primary/10 rounded-full blur-3xl opacity-40 group-hover:bg-theme-secondary/10 transition-colors" />
                                     <img
-                                        src={`http://localhost:4000/images/${p.playerKey}.png`}
-                                        onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; }}
+                                        src={`${API_URL}/images/${p.playerKey}.png`}
+                                        onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; }}
                                         className="h-[160%] w-auto object-contain object-bottom mt-16 relative z-10 transition-transform duration-700 group-hover:scale-110 drop-shadow-2xl"
                                         alt=""
                                     />

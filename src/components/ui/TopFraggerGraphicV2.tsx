@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
@@ -89,7 +90,7 @@ function PlayerPhoto({ player }: { player: PlayerStat }) {
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
             <img
-                src={`http://localhost:4000/images/${player.playerKey}.png`}
+                src={`${API_URL}/images/${player.playerKey}.png`}
                 onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom', filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.5))' }}
                 alt={player.name}
@@ -289,7 +290,7 @@ export default function TopFraggerGraphicV2() {
             }
         }
         try {
-            const res = await fetch('http://localhost:4000/api/layouts/push', {
+            const res = await fetch(`${API_URL}/api/layouts/push`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }),

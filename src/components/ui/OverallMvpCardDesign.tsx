@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -31,7 +32,7 @@ export default function OverallMvpCardDesign() {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('match_state_update', (data) => { if (data?.activePlayers) setFetchedData(data.activePlayers); });
         return () => { socket.disconnect(); };
     }, []);
@@ -86,7 +87,7 @@ export default function OverallMvpCardDesign() {
                             )}
                             {config.showPlayerPortrait && (
                                 <div className="relative overflow-hidden" style={{ height: 260, background: `linear-gradient(180deg, transparent 0%, ${config.cardBgColor || '#1a1a2e'} 100%)` }}>
-                                    <img src={`http://localhost:4000/images/${player.playerKey}.png`} onError={e => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; }} className="w-full h-full object-cover object-top" style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }} alt="" />
+                                    <img src={`${API_URL}/images/${player.playerKey}.png`} onError={e => { e.currentTarget.src = `${API_URL}/images/default.png`; }} className="w-full h-full object-cover object-top" style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }} alt="" />
                                     <div className="absolute inset-x-0 bottom-0 h-24" style={{ background: `linear-gradient(transparent, ${config.cardBgColor || '#1a1a2e'})` }} />
                                 </div>
                             )}

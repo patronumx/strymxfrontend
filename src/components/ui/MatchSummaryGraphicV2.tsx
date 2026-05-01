@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
@@ -329,7 +330,7 @@ export default function MatchSummaryGraphicV2() {
             }
         }
         try {
-            const res = await fetch('http://localhost:4000/api/layouts/push', {
+            const res = await fetch(`${API_URL}/api/layouts/push`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }),

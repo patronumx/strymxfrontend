@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -48,7 +49,7 @@ function WwcdPlayerCard({ player, style }: { player: PlayerStat; style: ElementS
     return (
         <div style={{ width: '100%', height: '100%', background: bg, border: `3px solid ${border}`, borderRadius: style.borderRadius ?? 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
             <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                <img src={`http://localhost:4000/images/${player.playerKey}.png`} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} style={{ height: '130%', width: 'auto', objectFit: 'contain', marginTop: 60, filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }} alt={player.name} />
+                <img src={`${API_URL}/images/${player.playerKey}.png`} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} style={{ height: '130%', width: 'auto', objectFit: 'contain', marginTop: 60, filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }} alt={player.name} />
             </div>
             <div style={{ padding: '16px 20px', borderTop: `3px solid ${border}`, background: `linear-gradient(135deg, ${bg}, rgba(15,23,42,0.9))` }}>
                 <h3 style={{ fontSize, fontWeight: style.fontWeight || 700, fontStyle: style.fontStyle || 'normal', color: accent, fontFamily: font?.family, margin: 0, textTransform: 'uppercase', letterSpacing: '-0.02em', lineHeight: 1 }}>{player.name}</h3>
@@ -115,7 +116,7 @@ export default function WwcdGraphicV2() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'wwcd-canvas-bounds';
     const playerBlockIds = [BLOCK_IDS.player1, BLOCK_IDS.player2, BLOCK_IDS.player3, BLOCK_IDS.player4];

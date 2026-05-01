@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
@@ -48,7 +49,7 @@ export default function TopFraggerClassic() {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
         });
@@ -106,8 +107,8 @@ export default function TopFraggerClassic() {
                         <div className="absolute bottom-16 left-12 flex flex-col items-start z-30">
                             {config.showPlayerPortrait && (
                                 <div className="w-[550px] h-[720px] flex justify-center items-end -mb-8 relative z-10">
-                                    <img src={`http://localhost:4000/images/${displayPlayer.playerKey}.png`}
-                                        onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; }}
+                                    <img src={`${API_URL}/images/${displayPlayer.playerKey}.png`}
+                                        onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; }}
                                         className="w-full h-auto object-contain object-bottom drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)]" alt="" />
                                 </div>
                             )}

@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, Suspense } from 'react';
 import { io } from 'socket.io-client';
@@ -44,7 +45,7 @@ export function MatchRankingsContent({ designerMode = false }: { designerMode?: 
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('connect', () => console.log('OBS Overlay connected to live data feed'));
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
@@ -245,8 +246,8 @@ export function MatchRankingsContent({ designerMode = false }: { designerMode?: 
                                             className="relative flex-1 h-[115%] flex flex-col justify-end z-10"
                                         >
                                             <img
-                                                src={`http://localhost:4000/images/${p.playerKey}.png`}
-                                                onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; }}
+                                                src={`${API_URL}/images/${p.playerKey}.png`}
+                                                onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; }}
                                                 className="w-full h-auto scale-110 object-contain object-bottom drop-shadow-[0_20px_40px_rgba(0,0,0,0.25)]"
                                                 alt=""
                                             />

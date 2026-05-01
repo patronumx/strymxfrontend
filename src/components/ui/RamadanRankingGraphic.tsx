@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -317,7 +318,7 @@ export default function RamadanRankingGraphic({ matchId = "test-match-001" }: { 
         let fetchInterval: NodeJS.Timeout | null = null;
 
         const tryFetch = () => {
-            fetch(`http://localhost:4000/api/match-state/${matchId}`)
+            fetch(`${API_URL}/api/match-state/${matchId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.activePlayers && data.activePlayers.length > 0) {
@@ -337,7 +338,7 @@ export default function RamadanRankingGraphic({ matchId = "test-match-001" }: { 
         fetchInterval = setInterval(tryFetch, 5000);
 
         // Socket Connection
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
 
         socket.on('match_state_update', (data: any) => {
             if (data?.activePlayers) processData(data.activePlayers);

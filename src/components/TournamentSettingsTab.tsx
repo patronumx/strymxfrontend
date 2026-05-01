@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -18,7 +19,7 @@ export default function TournamentSettingsTab({ tournament, onRefresh }: Props) 
     const [showManualLink, setShowManualLink] = useState(false);
 
     useEffect(() => {
-        fetch('http://localhost:4000/api/sheets/write-status')
+        fetch(`${API_URL}/api/sheets/write-status`)
             .then(r => r.json())
             .then(data => setIsReady(data.ready))
             .catch(() => {});
@@ -40,7 +41,7 @@ export default function TournamentSettingsTab({ tournament, onRefresh }: Props) 
         }
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:4000/api/sheets/create/${tournament.id}`, {
+            const res = await fetch(`${API_URL}/api/sheets/create/${tournament.id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ organizerEmail: organizerEmail.trim() })
@@ -62,7 +63,7 @@ export default function TournamentSettingsTab({ tournament, onRefresh }: Props) 
         if (!sheetUrl.trim()) { showMsg('Paste a sheet URL', 'error'); return; }
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:4000/api/tournaments/${tournament.id}`, {
+            const res = await fetch(`${API_URL}/api/tournaments/${tournament.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sheetUrl: sheetUrl.trim() })
@@ -78,7 +79,7 @@ export default function TournamentSettingsTab({ tournament, onRefresh }: Props) 
     const handleSetupSheet = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:4000/api/sheets/setup/${tournament.id}`, { method: 'POST' });
+            const res = await fetch(`${API_URL}/api/sheets/setup/${tournament.id}`, { method: 'POST' });
             const data = await res.json();
             showMsg(data.success ? `${data.tabsCreated} tabs created!` : (data.error || 'Setup failed'), data.success ? 'success' : 'error');
         } catch { showMsg('Backend not reachable', 'error'); }
@@ -88,7 +89,7 @@ export default function TournamentSettingsTab({ tournament, onRefresh }: Props) 
     const handleUpdateStructure = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:4000/api/sheets/update-structure/${tournament.id}`, { method: 'POST' });
+            const res = await fetch(`${API_URL}/api/sheets/update-structure/${tournament.id}`, { method: 'POST' });
             const data = await res.json();
             showMsg(data.success ? (data.tabsAdded > 0 ? `Added ${data.tabsAdded} new tabs!` : 'Already up to date.') : (data.error || 'Failed'), data.success ? 'success' : 'error');
         } catch { showMsg('Backend not reachable', 'error'); }
@@ -98,7 +99,7 @@ export default function TournamentSettingsTab({ tournament, onRefresh }: Props) 
     const handleSyncStandings = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:4000/api/sheets/sync-standings/${tournament.id}`, { method: 'POST' });
+            const res = await fetch(`${API_URL}/api/sheets/sync-standings/${tournament.id}`, { method: 'POST' });
             const data = await res.json();
             showMsg(data.success ? 'Standings synced!' : (data.error || 'Failed'), data.success ? 'success' : 'error');
         } catch { showMsg('Backend not reachable', 'error'); }

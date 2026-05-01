@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useState } from 'react';
 import { Play, Square, RefreshCcw, Monitor, Image as ImageIcon, Terminal, Zap } from 'lucide-react';
@@ -21,7 +22,7 @@ export default function PlayoutController() {
     const sendCommand = async (layer: number, templateUrl: string, action: string) => {
         try {
             logCommand(`Sending ${action} to Layer ${layer}...`, 'info');
-            const res = await fetch('http://localhost:4000/api/graphics/command', {
+            const res = await fetch(`${API_URL}/api/graphics/command`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ layer, templateUrl, action })

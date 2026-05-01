@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -62,7 +63,7 @@ export default function TeamManager() {
 
     const fetchTeams = async () => {
         try {
-            const res = await fetch('http://localhost:4000/api/teams');
+            const res = await fetch(`${API_URL}/api/teams`);
             if (res.ok) setTeams(await res.json());
         } catch (error) {
             console.error('Failed to fetch teams', error);
@@ -73,7 +74,7 @@ export default function TeamManager() {
 
     const fetchTournaments = async () => {
         try {
-            const res = await fetch('http://localhost:4000/api/tournaments');
+            const res = await fetch(`${API_URL}/api/tournaments`);
             if (res.ok) setTournaments(await res.json());
         } catch (error) {
             console.error('Failed to fetch tournaments', error);
@@ -87,7 +88,7 @@ export default function TeamManager() {
         }
         setLoadingGroups(true);
         try {
-            const res = await fetch(`http://localhost:4000/api/tournaments/${tournamentId}`);
+            const res = await fetch(`${API_URL}/api/tournaments/${tournamentId}`);
             if (res.ok) {
                 const data = await res.json();
                 // Flatten groups from all stages
@@ -191,8 +192,8 @@ export default function TeamManager() {
         setIsSaving(true);
         try {
             const url = editingTeamId 
-                ? `http://localhost:4000/api/teams/${editingTeamId}` 
-                : 'http://localhost:4000/api/teams';
+                ? `${API_URL}/api/teams/${editingTeamId}` 
+                : `${API_URL}/api/teams`;
             
             const method = editingTeamId ? 'PUT' : 'POST';
 
@@ -254,7 +255,7 @@ export default function TeamManager() {
         setConfirmModal({ isOpen: false, teamId: null });
         
         try {
-            const res = await fetch(`http://localhost:4000/api/teams/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_URL}/api/teams/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 showNotification('Team deleted successfully', 'success');
                 fetchTeams();
@@ -270,7 +271,7 @@ export default function TeamManager() {
 
     const exportIni = async () => {
         try {
-            const res = await fetch('http://localhost:4000/api/teams/export-ini', { method: 'POST' });
+            const res = await fetch(`${API_URL}/api/teams/export-ini`, { method: 'POST' });
             const data = await res.json();
             if (res.ok) {
                 showNotification(data.message || 'Successfully exported teams to strymx_teams.ini', 'success');

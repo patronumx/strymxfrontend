@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -90,13 +91,13 @@ function PlayerPortrait({ photoUrl, playerKey, name, theme }: {
     theme: any; 
 }) {
     const [imgSrc, setImgSrc] = useState<string | null>(
-        photoUrl || (playerKey ? `http://localhost:4000/images/${playerKey}.png` : null)
+        photoUrl || (playerKey ? `${API_URL}/images/${playerKey}.png` : null)
     );
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey) {
-            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/images/${playerKey}.png`);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -109,7 +110,7 @@ function PlayerPortrait({ photoUrl, playerKey, name, theme }: {
                     onError={() => {
                         // Fallback to backend port 4000 if 3000 fails
                         if (imgSrc?.includes(':3000')) {
-                            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+                            setImgSrc(`${API_URL}/images/${playerKey}.png`);
                         } else {
                             setFailed(true);
                         }
@@ -168,7 +169,7 @@ export default function MatchRankingGraphic({
             if (!teamMap.has(tName)) {
                 teamMap.set(tName, {
                     name: tName,
-                        logoUrl: p.logoUrl || "http://localhost:4000/placeholder.png",
+                        logoUrl: p.logoUrl || `${API_URL}/placeholder.png`,
                     elims: 0,
                     placePts: 0, 
                     totalPts: 0,
@@ -234,7 +235,7 @@ export default function MatchRankingGraphic({
 
     useEffect(() => {
         // Fetch initial
-        fetch(`http://localhost:4000/api/match-state/${matchId}`)
+        fetch(`${API_URL}/api/match-state/${matchId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.activePlayers) processData(data.activePlayers, data.matchInfo);
@@ -342,7 +343,7 @@ export default function MatchRankingGraphic({
                                 transition={{ delay: 0.7 }}
                                 className="flex items-center gap-6">
                                 <span className="text-8xl font-black border-b-4 pb-2" style={{ color: theme.primary, borderColor: theme.primary }}>#1</span>
-                                <img src={topTeam.logoUrl.replace('http:', 'http://localhost:4000')} onError={(e) => e.currentTarget.style.display = 'none'} className="h-24 object-contain" alt="" />
+                                <img src={topTeam.logoUrl.replace('http:', `${API_URL}`)} onError={(e) => e.currentTarget.style.display = 'none'} className="h-24 object-contain" alt="" />
                                 <span className="text-6xl font-black lowercase" style={{ color: theme.primary }}>{topTeam.name}</span>
                             </motion.div>
 
@@ -421,7 +422,7 @@ export default function MatchRankingGraphic({
                                     }}>
                                     <div className="w-24 text-4xl">#{i + 1}</div>
                                     <div className="flex-1 flex items-center gap-4">
-                                        <img src={t.logoUrl.replace('http:', 'http://localhost:4000')} onError={(e) => e.currentTarget.style.display = 'none'} className="h-10 object-contain" alt="" />
+                                        <img src={t.logoUrl.replace('http:', `${API_URL}`)} onError={(e) => e.currentTarget.style.display = 'none'} className="h-10 object-contain" alt="" />
                                         <span className="lowercase">{t.name}</span>
                                     </div>
                                     <div className="w-32 text-center">{t.placePts}</div>
@@ -456,7 +457,7 @@ export default function MatchRankingGraphic({
                                     style={{ borderColor: theme.secondary }}>
                                     <div className="w-24 text-4xl">#{i + 5}</div>
                                     <div className="flex-1 flex items-center gap-4">
-                                        <img src={t.logoUrl.replace('http:', 'http://localhost:4000')} onError={(e) => e.currentTarget.style.display = 'none'} className="h-10 object-contain" alt="" />
+                                        <img src={t.logoUrl.replace('http:', `${API_URL}`)} onError={(e) => e.currentTarget.style.display = 'none'} className="h-10 object-contain" alt="" />
                                         <span className="lowercase">{t.name}</span>
                                     </div>
                                     <div className="w-32 text-center">{t.placePts}</div>

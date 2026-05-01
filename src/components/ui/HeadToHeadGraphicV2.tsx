@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -44,7 +45,7 @@ function PlayerCard({ player, style, accentSide }: { player: PlayerStat; style: 
             {/* Photo */}
             <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', [accentSide]: 0, top: 0, bottom: 0, width: 8, background: accent }} />
-                <img src={`http://localhost:4000/images/${player.playerKey}.png`} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} style={{ height: '120%', width: 'auto', objectFit: 'contain', marginTop: 80, filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.5))' }} alt={player.name} />
+                <img src={`${API_URL}/images/${player.playerKey}.png`} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} style={{ height: '120%', width: 'auto', objectFit: 'contain', marginTop: 80, filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.5))' }} alt={player.name} />
             </div>
             {/* Info */}
             <div style={{ padding: '20px 28px', borderTop: `3px solid ${border}`, background: `linear-gradient(135deg, ${bg}, rgba(15,23,42,0.95))` }}>
@@ -128,7 +129,7 @@ export default function HeadToHeadGraphicV2() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'h2h-canvas-bounds';
 

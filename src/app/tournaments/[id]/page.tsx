@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -56,8 +57,8 @@ export default function TournamentDetails() {
     const fetchData = async () => {
         try {
             const [tRes, gTeamsRes] = await Promise.all([
-                fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}`),
-                fetch('http://localhost:4000/api/teams')
+                fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}`),
+                fetch(`${API_URL}/api/teams`)
             ]);
             
             if (tRes.ok) setTournament(await tRes.json());
@@ -79,7 +80,7 @@ export default function TournamentDetails() {
     const handleAssignTeam = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/teams`, {
+            await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/teams`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ teamIds: [assignTeamId], slotId: assignSlotId })
@@ -96,7 +97,7 @@ export default function TournamentDetails() {
     const handleRemoveTeam = async (teamId: string) => {
         if (!confirm('Are you sure you want to remove this team from the tournament?')) return;
         try {
-            await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/teams/${teamId}`, {
+            await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/teams/${teamId}`, {
                 method: 'DELETE'
             });
             fetchData();
@@ -108,7 +109,7 @@ export default function TournamentDetails() {
     const fetchStandings = async (dayNum: number | null = selectedStandingsDay) => {
         try {
             const query = dayNum ? `?dayNumber=${dayNum}` : '';
-            const res = await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/standings${query}`);
+            const res = await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/standings${query}`);
             if (res.ok) {
                 setStandings(await res.json());
             }
@@ -127,7 +128,7 @@ export default function TournamentDetails() {
     const handleCreateStage = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/stages`, {
+            await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/stages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -154,7 +155,7 @@ export default function TournamentDetails() {
     const handleUpdateStage = async (e: React.FormEvent, stageId: string) => {
         e.preventDefault();
         try {
-            await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/stages/${stageId}`, {
+            await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/stages/${stageId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -175,7 +176,7 @@ export default function TournamentDetails() {
 
     const handleDeleteStage = async (stageId: string) => {
         try {
-            await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/stages/${stageId}`, {
+            await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/stages/${stageId}`, {
                 method: 'DELETE'
             });
             setStageToDelete(null);
@@ -187,7 +188,7 @@ export default function TournamentDetails() {
 
     const fetchGroupTeams = async (groupId: string) => {
         try {
-            const res = await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/groups/${groupId}/teams`);
+            const res = await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/groups/${groupId}/teams`);
             if (res.ok) setGroupTeams(await res.json());
         } catch (error) {
             console.error(error);
@@ -196,7 +197,7 @@ export default function TournamentDetails() {
 
     const handleAssignToGroup = async (teamId: string) => {
         try {
-            await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/groups/${managingGroup.id}/teams`, {
+            await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/groups/${managingGroup.id}/teams`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ teamIds: [teamId] })
@@ -209,7 +210,7 @@ export default function TournamentDetails() {
 
     const handleRemoveFromGroup = async (teamId: string) => {
         try {
-            await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/groups/${managingGroup.id}/teams/${teamId}`, {
+            await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/groups/${managingGroup.id}/teams/${teamId}`, {
                 method: 'DELETE'
             });
             fetchGroupTeams(managingGroup.id);
@@ -220,7 +221,7 @@ export default function TournamentDetails() {
 
     const handleAdvanceTeams = async () => {
         try {
-            await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/groups/${managingGroup.id}/promote`, {
+            await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/groups/${managingGroup.id}/promote`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ targetGroupId: advancingTargetGroupId, topCount: advancingCount })
@@ -927,7 +928,7 @@ export default function TournamentDetails() {
                                                 <button
                                                     onClick={async () => {
                                                         try {
-                                                            const res = await fetch(`http://localhost:4000/api/tournaments/${encodeURIComponent(id)}/player-standings`);
+                                                            const res = await fetch(`${API_URL}/api/tournaments/${encodeURIComponent(id)}/player-standings`);
                                                             if (!res.ok) throw new Error('Failed to fetch player standings');
                                                             const data = await res.json();
                                                             

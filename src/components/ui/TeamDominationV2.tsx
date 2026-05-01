@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -48,7 +49,7 @@ function InfoBox({ data, style }: { data: TeamData; style: ElementStyle }) {
 function LogoBox({ data, style }: { data: TeamData; style: ElementStyle }) {
     return (
         <div style={{ width: '100%', height: '100%', borderRadius: style.borderRadius ?? 14, background: `${style.bgColor || '#7c3aed'}20`, border: `2px solid ${style.borderColor || '#7c3aed'}40`, padding: 10, boxShadow: `0 0 30px ${style.bgColor || '#7c3aed'}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img src={data.logoUrl || 'http://localhost:4000/placeholder-logo.png'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
+            <img src={data.logoUrl || `${API_URL}/placeholder-logo.png`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
         </div>
     );
 }
@@ -94,7 +95,7 @@ export default function TeamDominationV2() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'td-canvas-bounds';
     const comps: Record<string, React.FC<{ data: TeamData; style: ElementStyle }>> = { [BLOCK_IDS.killsPill]: KillsPill, [BLOCK_IDS.infoBox]: InfoBox, [BLOCK_IDS.logoBox]: LogoBox };

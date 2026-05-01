@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
@@ -80,7 +81,7 @@ const ALL_IDS = Object.values(BLOCK_IDS);
 // MOCK DATA for Edit Mode
 const MOCK_TEAMS: TeamScore[] = Array.from({ length: 17 }).map((_, i) => ({
     name: `TEAM ${i + 1}`,
-    logoUrl: 'http://localhost:4000/placeholder.png',
+    logoUrl: `${API_URL}/placeholder.png`,
     elims: Math.floor(Math.random() * 20),
     placePts: Math.floor(Math.random() * 10),
     totalPts: Math.floor(Math.random() * 30),
@@ -99,12 +100,12 @@ const MOCK_TEAMS: TeamScore[] = Array.from({ length: 17 }).map((_, i) => ({
 })).sort((a, b) => b.totalPts - a.totalPts);
 
 function PlayerPortrait({ photoUrl, playerKey, name }: { photoUrl?: string; playerKey: string; name: string }) {
-    const [imgSrc, setImgSrc] = useState<string | null>(photoUrl || (playerKey ? `http://localhost:4000/images/${playerKey}.png` : null));
+    const [imgSrc, setImgSrc] = useState<string | null>(photoUrl || (playerKey ? `${API_URL}/images/${playerKey}.png` : null));
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey) {
-            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/images/${playerKey}.png`);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -116,7 +117,7 @@ function PlayerPortrait({ photoUrl, playerKey, name }: { photoUrl?: string; play
                     src={imgSrc} 
                     onError={() => {
                         if (imgSrc?.includes(':3000')) {
-                            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+                            setImgSrc(`${API_URL}/images/${playerKey}.png`);
                         } else {
                             setFailed(true);
                         }
@@ -216,7 +217,7 @@ function TopTeamBlock({ team, style }: { team: TeamScore, style: ElementStyle })
 
             {/* Team Name Bar */}
             <div style={{ display: 'flex', alignItems: 'center', padding: '0 40px', marginBottom: 20, zIndex: 10 }}>
-                <img src={team.logoUrl.replace('http:', 'http://localhost:4000')} onError={(e) => e.currentTarget.style.display = 'none'} style={{ height: 80, width: 80, objectFit: 'contain', filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.5))' }} alt="" />
+                <img src={team.logoUrl.replace('http:', `${API_URL}`)} onError={(e) => e.currentTarget.style.display = 'none'} style={{ height: 80, width: 80, objectFit: 'contain', filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.5))' }} alt="" />
                 <span style={{ fontSize: 64, fontWeight: 900, color: textColor, fontFamily: font?.family, marginLeft: 20, textTransform: 'uppercase' }}>{team.name}</span>
             </div>
 
@@ -272,7 +273,7 @@ function StandingsColumn({ teams, startIndex, style }: { teams: TeamScore[], sta
                         <span style={{ fontSize: 36, fontWeight: 900, color: textColor, fontFamily: font?.family }}>#{startIndex + idx}</span>
                     </div>
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, paddingLeft: 0 }}>
-                        <img src={team.logoUrl.replace('http:', 'http://localhost:4000')} onError={(e) => e.currentTarget.style.display = 'none'} style={{ height: 36, width: 36, objectFit: 'contain' }} alt="" />
+                        <img src={team.logoUrl.replace('http:', `${API_URL}`)} onError={(e) => e.currentTarget.style.display = 'none'} style={{ height: 36, width: 36, objectFit: 'contain' }} alt="" />
                         <span style={{ fontSize: 28, fontWeight: 900, color: textColor, fontFamily: font?.family, textTransform: 'uppercase' }}>{team.name}</span>
                     </div>
                     <div style={{ display: 'flex', gap: 20 }}>
@@ -317,7 +318,7 @@ export default function MatchRankingPremium() {
             if (!teamMap.has(tName)) {
                 teamMap.set(tName, {
                     name: tName,
-                    logoUrl: p.logoUrl || "http://localhost:4000/placeholder.png",
+                    logoUrl: p.logoUrl || `${API_URL}/placeholder.png`,
                     elims: 0,
                     placePts: 0, 
                     totalPts: 0,
@@ -370,7 +371,7 @@ export default function MatchRankingPremium() {
 
     useEffect(() => {
         if (editMode) return;
-        fetch(`http://localhost:4000/api/match-state/test-match-001`)
+        fetch(`${API_URL}/api/match-state/test-match-001`)
             .then(res => res.json())
             .then(data => { if (data.activePlayers) processData(data.activePlayers, data.matchInfo); })
             .catch(console.error);
@@ -404,7 +405,7 @@ export default function MatchRankingPremium() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'mr-canvas-bounds';
 

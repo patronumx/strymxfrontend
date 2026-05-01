@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, Suspense } from 'react';
@@ -37,7 +38,7 @@ function StandingsContent() {
 
         const fetchStandings = async () => {
             try {
-                let url = `http://localhost:4000/api/tournaments/${tournamentId}/standings`;
+                let url = `${API_URL}/api/tournaments/${tournamentId}/standings`;
                 if (dayNumber) url += `?dayNumber=${dayNumber}`;
                 
                 const res = await fetch(url);

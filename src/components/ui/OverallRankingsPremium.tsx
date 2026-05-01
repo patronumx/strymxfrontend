@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
@@ -59,7 +60,7 @@ const ALL_IDS = Object.values(BLOCK_IDS);
 const MOCK_STANDINGS: StandingRow[] = Array.from({ length: 16 }).map((_, i) => ({
     teamId: i + 1,
     teamName: `TEAM ${i + 1}`,
-    logoUrl: 'http://localhost:4000/placeholder.png',
+    logoUrl: `${API_URL}/placeholder.png`,
     tag: 'TAG',
     matchesPlayed: 12,
     wwcd: Math.floor(Math.random() * 3),
@@ -214,7 +215,7 @@ export default function OverallRankingsPremium() {
         if (!tId) return;
 
         try {
-            let url = `http://localhost:4000/api/tournaments/${tId}/standings`;
+            let url = `${API_URL}/api/tournaments/${tId}/standings`;
             const dayNum = p.get('dayNumber');
             if (dayNum) url += `?dayNumber=${dayNum}`;
 
@@ -225,7 +226,7 @@ export default function OverallRankingsPremium() {
             }
             
             // Fetch tournament details for header info
-            const tRes = await fetch(`http://localhost:4000/api/tournaments/${tId}`);
+            const tRes = await fetch(`${API_URL}/api/tournaments/${tId}`);
             const tData = await tRes.json();
             if (tData) {
                 // Try to find current stage/match info
@@ -269,7 +270,7 @@ export default function OverallRankingsPremium() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'or-canvas-bounds';
 

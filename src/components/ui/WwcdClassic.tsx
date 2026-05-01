@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
@@ -27,7 +28,7 @@ function WwcdStatsContent() {
     const [fetchedData, setFetchedData] = useState<PlayerStat[]>([]);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('connect', () => console.log('WWCD Stats connected'));
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
@@ -206,8 +207,8 @@ function WwcdStatsContent() {
                                 {config.showPlayerPortrait && (
                                 <div className="h-full w-48 bg-[#111116] flex items-start justify-center relative overflow-hidden shrink-0 border-r-4 border-theme-secondary" style={{ borderColor: theme.secondary }}>
                                     <img
-                                        src={`http://localhost:4000/images/${player.playerKey}.png`}
-                                        onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; }}
+                                        src={`${API_URL}/images/${player.playerKey}.png`}
+                                        onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; }}
                                         className="h-[150%] w-full object-cover object-top translate-x-6 relative z-10 mt-2"
                                         alt=""
                                     />

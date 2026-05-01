@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
@@ -74,8 +75,8 @@ const ALL_IDS = Object.values(BLOCK_IDS);
 const MOCK_PLAYERS: PlayerStanding[] = Array.from({ length: 5 }).map((_, i) => ({
     playerName: `PLAYER NAME ${i + 1}`,
     teamName: `TEAM NAME ${i + 1}`,
-    logoUrl: 'http://localhost:4000/placeholder.png',
-    photoUrl: 'http://localhost:4000/placeholder.png',
+    logoUrl: `${API_URL}/placeholder.png`,
+    photoUrl: `${API_URL}/placeholder.png`,
     playerKey: `mock-${i}`,
     matches: 12,
     kills: 24 - i * 2,
@@ -85,12 +86,12 @@ const MOCK_PLAYERS: PlayerStanding[] = Array.from({ length: 5 }).map((_, i) => (
 }));
 
 function PlayerPortrait({ photoUrl, playerKey, name }: { photoUrl?: string; playerKey?: string; name: string }) {
-    const [imgSrc, setImgSrc] = useState<string | null>(photoUrl || (playerKey ? `http://localhost:4000/images/${playerKey}.png` : null));
+    const [imgSrc, setImgSrc] = useState<string | null>(photoUrl || (playerKey ? `${API_URL}/images/${playerKey}.png` : null));
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey) {
-            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/images/${playerKey}.png`);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -227,13 +228,13 @@ export default function RoadToMvpPremium() {
         if (!tId) return;
 
         try {
-            const res = await fetch(`http://localhost:4000/api/tournaments/${tId}/player-standings`);
+            const res = await fetch(`${API_URL}/api/tournaments/${tId}/player-standings`);
             const data = await res.json();
             if (Array.isArray(data)) {
                 setPlayers(data.slice(0, 5).map((p, idx) => ({ ...p, rank: idx + 1 })));
             }
             
-            const tRes = await fetch(`http://localhost:4000/api/tournaments/${tId}`);
+            const tRes = await fetch(`${API_URL}/api/tournaments/${tId}`);
             const tData = await tRes.json();
             if (tData) {
                 const stage = tData.stages?.[0];
@@ -273,7 +274,7 @@ export default function RoadToMvpPremium() {
 
     const handleReset = () => { clearOverlayLayout(OVERLAY_KEY); setResetCounter(c => c + 1); setStyleTick(t => t + 1); setSelectedId(null); };
     const handleStyleChangeAll = (patch: Partial<ElementStyle>) => { ALL_IDS.forEach(id => updateElementStyle(OVERLAY_KEY, id, patch)); setStyleTick(t => t + 1); };
-    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
+    const handleSave = async (): Promise<boolean> => { const layout: Record<string, any> = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith(`strymx_layout:${OVERLAY_KEY}:`)) { try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {} } } try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; } };
 
     const cls = 'rtm-canvas-bounds';
 

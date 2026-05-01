@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -22,13 +23,13 @@ function PlayerPortrait({ photoUrl, playerKey, name }: {
     name: string;
 }) {
     const [imgSrc, setImgSrc] = useState<string | null>(
-        photoUrl || (playerKey ? `http://localhost:4000/images/${playerKey}.png` : null)
+        photoUrl || (playerKey ? `${API_URL}/images/${playerKey}.png` : null)
     );
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey) {
-            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/images/${playerKey}.png`);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -40,7 +41,7 @@ function PlayerPortrait({ photoUrl, playerKey, name }: {
                     src={imgSrc}
                     onError={() => {
                         if (imgSrc?.includes(':3000')) {
-                            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+                            setImgSrc(`${API_URL}/images/${playerKey}.png`);
                         } else {
                             setFailed(true);
                         }
@@ -64,7 +65,7 @@ export default function DropLootGraphic() {
     const [playKey, setPlayKey] = useState(0);
 
     useEffect(() => {
-        const socket = io(`http://localhost:4000`);
+        const socket = io(`${API_URL}`);
 
         socket.on('graphic_command', (cmd) => {
             if (cmd.templateUrl === '/overlays/drop-looted') {
@@ -130,7 +131,7 @@ export default function DropLootGraphic() {
                                 className="absolute top-20 left-0 w-24 h-24 bg-white/10 backdrop-blur-md rounded-full p-2 border border-white/20 shadow-xl"
                             >
                                 <img
-                                    src={player.logoUrl || "http://localhost:4000/placeholder-logo.png"}
+                                    src={player.logoUrl || `${API_URL}/placeholder-logo.png`}
                                     className="w-full h-full object-contain filter drop-shadow-md"
                                     alt={player.teamName}
                                 />

@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -42,7 +43,7 @@ export default function TeamEliminatedGraphic() {
     }, []);
 
     useEffect(() => {
-        const socket = io(`http://localhost:4000`);
+        const socket = io(`${API_URL}`);
         socket.on('graphic_command', (cmd) => {
             if (cmd.templateUrl === '/overlays/team-eliminated') {
                 if (cmd.action === 'PLAY') {
@@ -155,7 +156,7 @@ export default function TeamEliminatedGraphic() {
                                         justifyContent: 'center',
                                     }}>
                                         <img
-                                            src={team.logoUrl || 'http://localhost:4000/placeholder-logo.png'}
+                                            src={team.logoUrl || `${API_URL}/placeholder-logo.png`}
                                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                             alt=""
                                         />

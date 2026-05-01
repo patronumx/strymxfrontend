@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -129,8 +130,8 @@ function PlayerCardContent({ rank, player, style }: { rank: number; player: Play
                 flex: '0 0 55%', position: 'relative', overflow: 'hidden',
             }}>
                 <img
-                    src={`http://localhost:4000/images/${player.playerKey}.png`}
-                    onError={e => { (e.currentTarget as HTMLImageElement).src = 'http://localhost:4000/images/default.png'; }}
+                    src={`${API_URL}/images/${player.playerKey}.png`}
+                    onError={e => { (e.currentTarget as HTMLImageElement).src = `${API_URL}/images/default.png`; }}
                     style={{
                         width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top',
                         filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))',
@@ -263,7 +264,7 @@ export default function MatchFraggersCardV2() {
                 try { layout[k.replace(`strymx_layout:${OVERLAY_KEY}:`, '')] = JSON.parse(localStorage.getItem(k)!); } catch {}
             }
         }
-        try { return (await fetch('http://localhost:4000/api/layouts/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; }
+        try { return (await fetch(`${API_URL}/api/layouts/push`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ overlayKey: OVERLAY_KEY, layout }) })).ok; } catch { return false; }
     };
 
     const cls = 'fraggers-cards-canvas-bounds';

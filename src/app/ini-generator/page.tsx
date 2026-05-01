@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useState, useRef, useCallback } from 'react';
@@ -229,7 +230,7 @@ export default function IniGenerator() {
     const fetchLogosFromDb = async () => {
         setIsLoadingLogos(true);
         try {
-            const res = await fetch('http://localhost:4000/api/teams');
+            const res = await fetch(`${API_URL}/api/teams`);
             if (!res.ok) throw new Error('Failed to fetch teams');
             const dbTeams = await res.json();
             
@@ -273,18 +274,18 @@ export default function IniGenerator() {
 
         try {
             // First check if team exists to pick POST vs PUT
-            const allRes = await fetch('http://localhost:4000/api/teams');
+            const allRes = await fetch(`${API_URL}/api/teams`);
             const allTeams = await allRes.json();
             const existing = allTeams.find((t: any) => t.name.toLowerCase() === team.name.toLowerCase());
 
             let res;
             if (existing) {
-                res = await fetch(`http://localhost:4000/api/teams/${existing.id}`, {
+                res = await fetch(`${API_URL}/api/teams/${existing.id}`, {
                     method: 'PUT',
                     body: formData
                 });
             } else {
-                res = await fetch('http://localhost:4000/api/teams', {
+                res = await fetch(`${API_URL}/api/teams`, {
                     method: 'POST',
                     body: formData
                 });

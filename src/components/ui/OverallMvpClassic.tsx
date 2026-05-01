@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
@@ -49,7 +50,7 @@ export default function OverallMvpClassic() {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
         });
@@ -134,7 +135,7 @@ export default function OverallMvpClassic() {
                             {config.showPlayerPortrait && (
                                 <div className="relative w-44 h-full flex items-center justify-center bg-white border-r border-slate-100 overflow-hidden">
                                     <div className="absolute inset-y-0 left-0 w-3 bg-theme-secondary" style={{ backgroundColor: theme.secondary }} />
-                                    <img src={`http://localhost:4000/images/${player.playerKey}.png`} onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; }} className="h-[160%] w-auto object-contain object-bottom mt-16 relative z-10 drop-shadow-2xl" alt="" />
+                                    <img src={`${API_URL}/images/${player.playerKey}.png`} onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; }} className="h-[160%] w-auto object-contain object-bottom mt-16 relative z-10 drop-shadow-2xl" alt="" />
                                 </div>
                             )}
                             <div className="flex-[1.8] px-10 flex flex-col justify-center bg-white h-full relative z-10">

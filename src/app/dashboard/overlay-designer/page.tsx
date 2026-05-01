@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 import React, { useState, useEffect } from 'react';
 import { Save, Layers, Palette, Search, Plus, Code, Image as ImageIcon, Trash2, CheckCircle2, ChevronRight, X, MousePointer2, Eye, EyeOff } from 'lucide-react';
@@ -625,7 +626,7 @@ export default function OverlayDesignerMapper() {
                             <div className="w-full bg-black border border-slate-800 rounded-xl p-4 text-left font-mono text-xs overflow-hidden">
                                 <div className="text-slate-500 mb-1">OBS Browser Source URL:</div>
                                 <div className="text-blue-400 break-all select-all">
-                                    http://localhost:4000/overlay/live?template=tpl_{Date.now().toString().slice(-4)}
+                                    ${API_URL}/overlay/live?template=tpl_{Date.now().toString().slice(-4)}
                                 </div>
                             </div>
                         </div>

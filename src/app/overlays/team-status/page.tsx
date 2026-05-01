@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -20,7 +21,7 @@ export default function TeamStatusOverlay() {
 
     useEffect(() => {
         // Fetch initial state for OBS
-        fetch('http://localhost:4000/api/match-state/test-match-001')
+        fetch(`${API_URL}/api/match-state/test-match-001`)
             .then(res => res.json())
             .then(data => {
                 if (data.activePlayers && data.activePlayers.length > 0) {
@@ -30,7 +31,7 @@ export default function TeamStatusOverlay() {
             .catch(err => console.error("Initial fetch error:", err));
 
         // Hidden connection to backend (no UI indicators needed for broadcast)
-        const newSocket = io('http://localhost:4000');
+        const newSocket = io(`${API_URL}`);
 
         newSocket.on('match_state_update', (data) => {
             if (data.activePlayers) {

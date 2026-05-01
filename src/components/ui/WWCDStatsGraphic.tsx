@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -37,13 +38,13 @@ function PlayerPortrait({ photoUrl, playerKey, name, theme }: {
     theme: any; 
 }) {
     const [imgSrc, setImgSrc] = useState<string | null>(
-        photoUrl || (playerKey && !playerKey.startsWith('pad') ? `http://localhost:4000/images/${playerKey}.png` : null)
+        photoUrl || (playerKey && !playerKey.startsWith('pad') ? `${API_URL}/images/${playerKey}.png` : null)
     );
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey && !playerKey.startsWith('pad')) {
-            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/images/${playerKey}.png`);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -57,7 +58,7 @@ function PlayerPortrait({ photoUrl, playerKey, name, theme }: {
                     src={imgSrc} 
                     onError={() => {
                         if (imgSrc?.includes(':3000')) {
-                            setImgSrc(`http://localhost:4000/images/${playerKey}.png`);
+                            setImgSrc(`${API_URL}/images/${playerKey}.png`);
                         } else {
                             setFailed(true);
                         }
@@ -96,7 +97,7 @@ export default function WWCDStatsGraphic({ matchId = "test-match-001" }: { match
             if (!teamMap.has(tName)) {
                 teamMap.set(tName, {
                     name: tName,
-                    logoUrl: p.logoUrl || "http://localhost:4000/placeholder.png",
+                    logoUrl: p.logoUrl || `${API_URL}/placeholder.png`,
                     elims: 0,
                     totalPts: 0,
                     players: []
@@ -122,7 +123,7 @@ export default function WWCDStatsGraphic({ matchId = "test-match-001" }: { match
     };
 
     useEffect(() => {
-        fetch(`http://localhost:4000/api/match-state/${matchId}`)
+        fetch(`${API_URL}/api/match-state/${matchId}`)
             .then(res => res.json())
             .then(data => { if (data.activePlayers) processData(data.activePlayers, data.matchInfo); })
             .catch(console.error);
@@ -240,7 +241,7 @@ export default function WWCDStatsGraphic({ matchId = "test-match-001" }: { match
                                 initial={{ scale: 0, rotate: -45 }}
                                 animate={{ scale: 1, rotate: 0 }}
                                 transition={{ type: 'spring', delay: 1 }}
-                                src={team.logoUrl.replace('http:', 'http://localhost:4000')} onError={(e) => e.currentTarget.style.display = 'none'} className="max-w-full max-h-full object-contain filter drop-shadow-xl" alt={team.name} />
+                                src={team.logoUrl.replace('http:', `${API_URL}`)} onError={(e) => e.currentTarget.style.display = 'none'} className="max-w-full max-h-full object-contain filter drop-shadow-xl" alt={team.name} />
                         </div>
 
                         {/* 4 Player Columns */}

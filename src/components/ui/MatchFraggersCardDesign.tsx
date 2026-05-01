@@ -1,3 +1,4 @@
+import { API_URL } from '@/lib/api-config';
 "use client"
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
@@ -57,7 +58,7 @@ export default function MatchFraggersCardDesign() {
     }, []);
 
     useEffect(() => {
-        const socket = io('http://localhost:4000');
+        const socket = io(`${API_URL}`);
         socket.on('match_state_update', (data) => {
             if (data && data.activePlayers) setFetchedData(data.activePlayers);
         });
@@ -188,8 +189,8 @@ export default function MatchFraggersCardDesign() {
                                     }}
                                 >
                                     <img
-                                        src={`http://localhost:4000/images/${player.playerKey}.png`}
-                                        onError={(e) => { e.currentTarget.src = 'http://localhost:4000/images/default.png'; }}
+                                        src={`${API_URL}/images/${player.playerKey}.png`}
+                                        onError={(e) => { e.currentTarget.src = `${API_URL}/images/default.png`; }}
                                         className="w-full h-full object-cover object-top"
                                         alt={player.name}
                                         style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }}
