@@ -39,13 +39,16 @@ function PlayerPortrait({ photoUrl, playerKey, name, theme }: {
     theme: any; 
 }) {
     const [imgSrc, setImgSrc] = useState<string | null>(
-        photoUrl || (playerKey && !playerKey.startsWith('pad') ? `${API_URL}/images/${playerKey}.png` : null)
+        photoUrl || (playerKey && !playerKey.startsWith('pad') ? `${API_URL}/api/assets/photo?playerKey=${playerKey}` : null)
     );
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey && !playerKey.startsWith('pad')) {
-            setImgSrc(`${API_URL}/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/api/assets/photo?playerKey=${playerKey}`);
+            setFailed(false);
+        } else if (photoUrl) {
+            setImgSrc(photoUrl);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -58,8 +61,9 @@ function PlayerPortrait({ photoUrl, playerKey, name, theme }: {
                 <img 
                     src={imgSrc} 
                     onError={() => {
-                        if (imgSrc?.includes(':3000')) {
-                            setImgSrc(`${API_URL}/images/${playerKey}.png`);
+                        // Smart Fallback: If cloud/primary fails, try local agent
+                        if (!imgSrc.includes('127.0.0.1')) {
+                            setImgSrc(`http://127.0.0.1:4000/api/assets/photo?playerKey=${playerKey}`);
                         } else {
                             setFailed(true);
                         }

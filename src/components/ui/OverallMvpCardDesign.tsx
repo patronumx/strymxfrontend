@@ -85,12 +85,25 @@ export default function OverallMvpCardDesign() {
                                     <img src={player.logoUrl} className="w-full h-full object-contain" alt="" />
                                 </div>
                             )}
-                            {config.showPlayerPortrait && (
-                                <div className="relative overflow-hidden" style={{ height: 260, background: `linear-gradient(180deg, transparent 0%, ${config.cardBgColor || '#1a1a2e'} 100%)` }}>
-                                    <img src={`${API_URL}/images/${player.playerKey}.png`} onError={e => { e.currentTarget.src = `${API_URL}/images/default.png`; }} className="w-full h-full object-cover object-top" style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }} alt="" />
-                                    <div className="absolute inset-x-0 bottom-0 h-24" style={{ background: `linear-gradient(transparent, ${config.cardBgColor || '#1a1a2e'})` }} />
-                                </div>
-                            )}
+                                {config.showPlayerPortrait && (
+                                    <div className="relative overflow-hidden" style={{ height: 260, background: `linear-gradient(180deg, transparent 0%, ${config.cardBgColor || '#1a1a2e'} 100%)` }}>
+                                        <img 
+                                            src={`${API_URL}/api/assets/photo?playerKey=${player.playerKey}`} 
+                                            onError={e => { 
+                                                // If cloud/primary fails, try local agent
+                                                if (!e.currentTarget.src.includes('127.0.0.1')) {
+                                                    e.currentTarget.src = `http://127.0.0.1:4000/api/assets/photo?playerKey=${player.playerKey}`;
+                                                } else {
+                                                    e.currentTarget.src = `${API_URL}/images/default.png`; 
+                                                }
+                                            }} 
+                                            className="w-full h-full object-cover object-top" 
+                                            style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }} 
+                                            alt="" 
+                                        />
+                                        <div className="absolute inset-x-0 bottom-0 h-24" style={{ background: `linear-gradient(transparent, ${config.cardBgColor || '#1a1a2e'})` }} />
+                                    </div>
+                                )}
                             <div className="px-5 pt-2 pb-2">
                                 <h3 style={{ fontSize: 20, fontWeight: 900, color: config.playerNameColor || '#fff', textTransform: 'uppercase', letterSpacing: '-0.02em', lineHeight: 1.1, margin: 0 }}>{player.name}</h3>
                                 <p style={{ fontSize: 11, fontWeight: 800, color: config.teamNameColor || '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: 2 }}>{player.teamName}</p>

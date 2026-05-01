@@ -52,9 +52,21 @@ function LiveOverlayContent() {
         let totalKnocks = 0;
         let totalHeadshots = 0;
 
-        liveData.forEach((p: any) => {
+        // Step 1: Robust Player Deduplication
+        const uniquePlayerMap = new Map<string, any>();
+        liveData.forEach(p => {
+            const pk = p.playerKey || p.PlayerKey;
+            if (!pk) return;
+            const existing = uniquePlayerMap.get(pk);
+            if (!existing || (p.killNum || 0) > (existing.killNum || 0) || (p.damage || 0) > (existing.damage || 0)) {
+                uniquePlayerMap.set(pk, p);
+            }
+        });
+
+        // Step 2: Aggregate by Team
+        Array.from(uniquePlayerMap.values()).forEach((p: any) => {
             const nameStr = p.playerName || p.PlayerName || '';
-            if ((nameStr === '' || nameStr === 'Unknown') && (!p.damage && !p.killNum)) return;
+            if ((nameStr === '' || nameStr === 'Unknown' || nameStr === '-') && (!p.damage && !p.killNum)) return;
 
             const tName = p.teamName || p.teamId || 'Unknown';
             if (!teamMap.has(tName)) {

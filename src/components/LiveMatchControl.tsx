@@ -244,7 +244,7 @@ export default function LiveMatchControl() {
 
         newSocket.on('connect', () => setIsConnected(true));
         newSocket.on('disconnect', () => setIsConnected(false));
-        
+
         // Load live tournament state
         setLiveTournamentId(localStorage.getItem('strymx_active_tournament_id'));
 
@@ -253,9 +253,7 @@ export default function LiveMatchControl() {
             if (data.activePlayers) setPlayers(data.activePlayers);
         });
 
-        newSocket.on('data_ingested', (data) => {
-            // Keep track of sync privately but don't spam the user with toasts
-            // since it happens very frequently and overwrites more important messages.
+        newSocket.on('data_ingested', () => {
             console.log("Live Telemetry Synced");
             lastToastTime.current = Date.now();
         });
@@ -264,11 +262,25 @@ export default function LiveMatchControl() {
     }, []);
 
     const teamRankings = React.useMemo(() => {
+        // ── Deduplicate players by playerKey ──────────────────────────────────
+        const uniquePlayerMap = new Map<string, any>();
+        players.forEach(p => {
+            const existing = uniquePlayerMap.get(p.playerKey);
+            if (!existing) {
+                uniquePlayerMap.set(p.playerKey, p);
+            } else {
+                if ((p.killNum ?? 0) >= (existing.killNum ?? 0) &&
+                    (p.damage ?? 0) >= (existing.damage ?? 0)) {
+                    uniquePlayerMap.set(p.playerKey, p);
+                }
+            }
+        });
+        const dedupedPlayers = Array.from(uniquePlayerMap.values())
+            .filter((p: any) => !(p.name === 'Unknown' && p.damage === 0 && p.killNum === 0));
+
+        // ── Build team map ─────────────────────────────────────────────────────
         const teamMap = new Map<string, TeamRanking>();
-
-        const validPlayers = players.filter(p => !(p.name === 'Unknown' && p.damage === 0 && p.killNum === 0));
-
-        validPlayers.forEach((p) => {
+        dedupedPlayers.forEach((p: any) => {
             const tName = p.teamName;
             if (!teamMap.has(tName)) {
                 teamMap.set(tName, {
@@ -283,7 +295,7 @@ export default function LiveMatchControl() {
                 });
             }
             const t = teamMap.get(tName)!;
-            if (p.placePts !== undefined) t.placePts = p.placePts;
+            if (p.placePts !== undefined && p.placePts > t.placePts) t.placePts = p.placePts;
             if (p.placement !== undefined) t.placement = p.placement;
             t.elims += p.killNum;
             t.players.push(p);
@@ -291,32 +303,62 @@ export default function LiveMatchControl() {
 
         const allTeams = Array.from(teamMap.values()).map(t => {
             t.totalPts = t.elims + t.placePts;
-            t.players.sort((a, b) => a.playerKey.localeCompare(b.playerKey));
+            t.players.sort((a: any, b: any) => a.playerKey.localeCompare(b.playerKey));
             return t;
         });
 
+        // ── Persistent slot order via localStorage ─────────────────────────────
+        // Shared key with the overlay so both show the same team order
+        let savedSlots: Record<string, number> = {};
+        try { savedSlots = JSON.parse(localStorage.getItem('strymx_team_slots') || '{}'); } catch { savedSlots = {}; }
+        let changed = false;
+        allTeams.forEach(t => {
+            if (!(t.name in savedSlots)) {
+                savedSlots[t.name] = Object.keys(savedSlots).length;
+                changed = true;
+            }
+        });
+        if (changed) { try { localStorage.setItem('strymx_team_slots', JSON.stringify(savedSlots)); } catch { /* ignore */ } }
+
+        // ── Stable sort ────────────────────────────────────────────────────────
+        const teamIsEliminated = (t: TeamRanking) => t.placement !== null && t.placement !== undefined;
         return allTeams.sort((a, b) => {
-            // Tier 1: Alive teams rank above fully-eliminated teams
-            const teamIsEliminated = (t: TeamRanking) => t.placement !== null && t.placement !== undefined;
             const aliveA = teamIsEliminated(a) ? 1 : 0;
             const aliveB = teamIsEliminated(b) ? 1 : 0;
             if (aliveA !== aliveB) return aliveA - aliveB;
-            
-            // Tier 2: Higher points first
             const ptsDiff = b.totalPts - a.totalPts;
             if (ptsDiff !== 0) return ptsDiff;
-            
-            // Tier 3: Higher elims first
             const elimsDiff = b.elims - a.elims;
             if (elimsDiff !== 0) return elimsDiff;
-            
-            // Tier 4: Stable tie-breaker
+            const slotA = savedSlots[a.name] ?? 9999;
+            const slotB = savedSlots[b.name] ?? 9999;
+            if (slotA !== slotB) return slotA - slotB;
             return a.name.localeCompare(b.name);
         });
     }, [players]);
 
     const validPlayers = React.useMemo(() => {
-        return players.filter(p => !(p.name === 'Unknown' && p.damage === 0 && p.killNum === 0));
+        const uniquePlayerMap = new Map<string, any>();
+        players.forEach(p => {
+            const existing = uniquePlayerMap.get(p.playerKey);
+            if (!existing) {
+                uniquePlayerMap.set(p.playerKey, p);
+            } else {
+                // Keep whichever version has more recent/complete data
+                if ((p.killNum ?? 0) >= (existing.killNum ?? 0) &&
+                    (p.damage ?? 0) >= (existing.damage ?? 0)) {
+                    uniquePlayerMap.set(p.playerKey, p);
+                }
+            }
+        });
+
+        return Array.from(uniquePlayerMap.values()).filter(p => {
+            // Drop placeholder players with no stats
+            const isUnknown = !p.name || p.name === 'Unknown' || p.name === '-';
+            const hasNoStats = (p.killNum || 0) === 0 && (p.damage || 0) === 0;
+            if (isUnknown && hasNoStats) return false;
+            return true;
+        });
     }, [players]);
 
     const matchSummaryStats = React.useMemo(() => {
@@ -425,6 +467,7 @@ export default function LiveMatchControl() {
             }
             
             console.log('Reset successful');
+            localStorage.removeItem('strymx_team_slots'); // Clear team slot order for fresh match
             setPlayers([]); // Optimistically clear frontend
             setIsResetModalOpen(false);
             showNotification('Match reset successfully!', 'success');
@@ -486,12 +529,24 @@ export default function LiveMatchControl() {
     };
 
     // Stable Sorting for Telemetry Table
-    const sortedTelemetryPlayers = [...validPlayers].sort((a, b) => {
-        if (Math.round(b.damage) !== Math.round(a.damage)) {
-            return Math.round(b.damage) - Math.round(a.damage);
-        }
-        return a.playerKey.localeCompare(b.playerKey); // Stable tie-breaker
-    });
+    const sortedTelemetryPlayers = React.useMemo(() => {
+        return [...validPlayers].sort((a, b) => {
+            // Tier 1: Damage DESC
+            const dmgA = Math.round(a.damage || 0);
+            const dmgB = Math.round(b.damage || 0);
+            if (dmgB !== dmgA) return dmgB - dmgA;
+            
+            // Tier 2: Elims DESC
+            const killsA = a.killNum || 0;
+            const killsB = b.killNum || 0;
+            if (killsB !== killsA) return killsB - killsA;
+            
+            // Tier 3: Stable Tie-breaker (Team + Name)
+            const stableA = `${a.teamName}-${a.name}`.toLowerCase();
+            const stableB = `${b.teamName}-${b.name}`.toLowerCase();
+            return stableA.localeCompare(stableB);
+        });
+    }, [validPlayers]);
 
     const handleExportCSV = () => {
         if (validPlayers.length === 0) return showNotification('No data to export.', 'error');
@@ -741,7 +796,6 @@ export default function LiveMatchControl() {
                     <div className="flex items-center gap-3 flex-1 overflow-x-auto no-scrollbar">
                         {/* Status Badge */}
                         <div className="flex items-center gap-2 px-3 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl shrink-0">
-                            <div className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                             </div>
@@ -901,9 +955,9 @@ export default function LiveMatchControl() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
                 {[
-                    { title: "Teams Alive", value: activeTeams, max: 16, icon: Users, color: "text-blue-400", border: "border-blue-500/30", bg: "from-blue-500/10" },
-                    { title: "Players Alive", value: alivePlayers, max: 64, icon: Eye, color: "text-emerald-400", border: "border-emerald-500/30", bg: "from-emerald-500/10" },
-                    { title: "Casualties", value: deadPlayers, max: 64, icon: ShieldAlert, color: "text-rose-400", border: "border-rose-500/30", bg: "from-rose-500/10" },
+                    { title: "Teams Alive", value: activeTeams, max: teamRankings.length || 16, icon: Users, color: "text-blue-400", border: "border-blue-500/30", bg: "from-blue-500/10" },
+                    { title: "Players Alive", value: alivePlayers, max: validPlayers.length || 64, icon: Eye, color: "text-emerald-400", border: "border-emerald-500/30", bg: "from-emerald-500/10" },
+                    { title: "Casualties", value: deadPlayers, max: validPlayers.length || 64, icon: ShieldAlert, color: "text-rose-400", border: "border-rose-500/30", bg: "from-rose-500/10" },
                     { title: "Net Connection", value: isConnected ? "Stable" : "Lost", max: null, icon: Activity, color: isConnected ? "text-emerald-400" : "text-rose-400", border: isConnected ? "border-emerald-500/30" : "border-rose-500/30", bg: isConnected ? "from-emerald-500/10" : "from-rose-500/10" }
                 ].map((kpi, idx) => (
                     <motion.div
@@ -915,6 +969,7 @@ export default function LiveMatchControl() {
                     >
                         {/* Soft Top Glow */}
                         <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r transparent via-current to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${kpi.color}`}></div>
+
                         <div className={`absolute inset-0 bg-gradient-to-br ${kpi.bg} to-transparent opacity-20 group-hover:opacity-40 transition-opacity`}></div>
 
                         <div className={`absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity ${kpi.color}`}>

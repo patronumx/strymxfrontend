@@ -185,9 +185,24 @@ export default function LiveRankingsGraphicV2() {
     const teamsData = useMemo(() => {
         if (!fetchedData || fetchedData.length === 0) return [];
         const teamMap = new Map<string, any>();
-        fetchedData.forEach((p: any) => {
-            const nameStr = p.playerName || p.PlayerName || '';
-            if ((nameStr === '' || nameStr === 'Unknown') && (!p.damage && !p.killNum)) return;
+        
+        // Step 1: Robust Player Deduplication
+        const uniquePlayerMap = new Map<string, any>();
+        fetchedData.forEach(p => {
+            const pk = p.playerKey || p.PlayerKey;
+            if (!pk) return;
+            const existing = uniquePlayerMap.get(pk);
+            if (!existing || (p.killNum || 0) > (existing.killNum || 0) || (p.damage || 0) > (existing.damage || 0)) {
+                uniquePlayerMap.set(pk, p);
+            }
+        });
+
+        // Step 2: Aggregate by Team
+        Array.from(uniquePlayerMap.values()).forEach((p: any) => {
+            const nameStr = p.playerName || p.PlayerName || p.name || '';
+            // Filter out placeholders
+            if ((nameStr === '' || nameStr === 'Unknown' || nameStr === '-') && (!p.damage && !p.killNum)) return;
+            
             const tName = p.teamName || p.teamId || 'Unknown';
             const tTag = p.teamTag || tName.slice(0, 3).toUpperCase();
             if (!teamMap.has(tName)) {

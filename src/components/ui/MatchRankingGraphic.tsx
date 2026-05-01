@@ -92,13 +92,16 @@ function PlayerPortrait({ photoUrl, playerKey, name, theme }: {
     theme: any; 
 }) {
     const [imgSrc, setImgSrc] = useState<string | null>(
-        photoUrl || (playerKey ? `${API_URL}/images/${playerKey}.png` : null)
+        photoUrl || (playerKey ? `${API_URL}/api/assets/photo?playerKey=${playerKey}` : null)
     );
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!photoUrl && playerKey) {
-            setImgSrc(`${API_URL}/images/${playerKey}.png`);
+            setImgSrc(`${API_URL}/api/assets/photo?playerKey=${playerKey}`);
+            setFailed(false);
+        } else if (photoUrl) {
+            setImgSrc(photoUrl);
             setFailed(false);
         }
     }, [photoUrl, playerKey]);
@@ -109,9 +112,9 @@ function PlayerPortrait({ photoUrl, playerKey, name, theme }: {
                 <img 
                     src={imgSrc} 
                     onError={() => {
-                        // Fallback to backend port 4000 if 3000 fails
-                        if (imgSrc?.includes(':3000')) {
-                            setImgSrc(`${API_URL}/images/${playerKey}.png`);
+                        // Smart Fallback: If cloud/primary fails, try local agent
+                        if (!imgSrc.includes('127.0.0.1')) {
+                            setImgSrc(`http://127.0.0.1:4000/api/assets/photo?playerKey=${playerKey}`);
                         } else {
                             setFailed(true);
                         }
@@ -154,25 +157,43 @@ export default function MatchRankingGraphic({
         groupName: 'Lobby',
         dayNumber: 1,
         matchNumber: 1,
+        matchIdDisplay: 'Match 1',
         mapName: 'Erangel'
     });
     const [isVisible, setIsVisible] = useState(false); // Controlled by CasparCG
     const [playKey, setPlayKey] = useState(0);
-    // Frozen slot order: locked in on first data receive, never changes unless scores differ
-    const frozenOrderRef = useRef<string[]>([]);
 
     const processData = (activePlayers: PlayerStat[], info?: any) => {
         if (info) setMatchInfo(info);
-        const teamMap = new Map<string, TeamScore>();
 
-        activePlayers.forEach((p) => {
+        // ── STEP 1: Deduplicate players by playerKey ───────────────────────────
+        // The backend can send the same player twice in one packet.
+        // If we don't deduplicate, elims get doubled (causing 73/64 casualties).
+        const uniquePlayerMap = new Map<string, PlayerStat>();
+        activePlayers.forEach(p => {
+            const existing = uniquePlayerMap.get(p.playerKey);
+            if (!existing) {
+                uniquePlayerMap.set(p.playerKey, p);
+            } else {
+                // Keep whichever version has more recent/complete data
+                if ((p.killNum ?? 0) >= (existing.killNum ?? 0) &&
+                    (p.damage ?? 0) >= (existing.damage ?? 0)) {
+                    uniquePlayerMap.set(p.playerKey, p);
+                }
+            }
+        });
+        const dedupedPlayers = Array.from(uniquePlayerMap.values());
+
+        // ── STEP 2: Build team map from deduplicated players ───────────────────
+        const teamMap = new Map<string, TeamScore>();
+        dedupedPlayers.forEach((p) => {
             const tName = p.teamName;
             if (!teamMap.has(tName)) {
                 teamMap.set(tName, {
                     name: tName,
-                        logoUrl: p.logoUrl || `${API_URL}/placeholder.png`,
+                    logoUrl: p.logoUrl || `${API_URL}/placeholder.png`,
                     elims: 0,
-                    placePts: 0, 
+                    placePts: 0,
                     totalPts: 0,
                     teamId: p.teamId,
                     placement: null,
@@ -180,55 +201,66 @@ export default function MatchRankingGraphic({
                 });
             }
             const t = teamMap.get(tName)!;
-            if (p.placePts !== undefined) t.placePts = p.placePts;
+            // Always take the highest placePts seen for this team
+            if (p.placePts !== undefined && p.placePts > t.placePts) t.placePts = p.placePts;
             if (p.placement !== undefined) t.placement = p.placement;
             t.elims += p.killNum;
             t.players.push(p);
         });
 
-        // Finalize team scores
         const allTeams = Array.from(teamMap.values()).map(t => {
             t.totalPts = t.elims + t.placePts;
-            
-            // Stable slot sorting: never sort by liveState/health, otherwise players will swap places
-            // when someone dies, which looks like an alive player suddenly regaining health because they 
-            // moved into the dead player's old slot.
             t.players.sort((a, b) => a.playerKey.localeCompare(b.playerKey));
-            
             return t;
         });
 
-        // === FROZEN SLOT SYSTEM ===
-        // Lock in team order on first data receive. Never shuffle when scores are tied.
-        if (frozenOrderRef.current.length === 0) {
-            const initial = [...allTeams].sort((a, b) =>
-                b.totalPts - a.totalPts ||
-                b.elims - a.elims ||
-                (a.teamId || 0) - (b.teamId || 0) ||
-                a.name.localeCompare(b.name)
-            );
-            frozenOrderRef.current = initial.map(t => t.name);
+        // ── STEP 3: Persistent slot order via localStorage ─────────────────────
+        // localStorage survives page refresh, socket reconnects, and component remounts.
+        // This is the definitive stable tie-breaker — no useRef tricks needed.
+        let savedSlots: Record<string, number> = {};
+        try {
+            savedSlots = JSON.parse(localStorage.getItem('strymx_team_slots') || '{}');
+        } catch { savedSlots = {}; }
+
+        let changed = false;
+        allTeams.forEach(t => {
+            if (!(t.name in savedSlots)) {
+                // Assign next sequential slot index
+                savedSlots[t.name] = Object.keys(savedSlots).length;
+                changed = true;
+            }
+        });
+
+        if (changed) {
+            try {
+                localStorage.setItem('strymx_team_slots', JSON.stringify(savedSlots));
+            } catch { /* storage full, ignore */ }
         }
 
-        const frozenOrder = frozenOrderRef.current;
-        // placement is the authoritative backend signal that a team has been fully eliminated.
+        // ── STEP 4: Stable sort ────────────────────────────────────────────────
         const teamIsEliminated = (t: TeamScore) => t.placement !== null && t.placement !== undefined;
 
         const sorted = [...allTeams].sort((a, b) => {
-            // Tier 1: Alive teams rank above fully-eliminated teams
+            // T1: Alive teams always rank above eliminated teams
             const aliveA = teamIsEliminated(a) ? 1 : 0;
             const aliveB = teamIsEliminated(b) ? 1 : 0;
             if (aliveA !== aliveB) return aliveA - aliveB;
-            // Tier 2: Higher points first
+
+            // T2: Higher total points
             const ptsDiff = b.totalPts - a.totalPts;
             if (ptsDiff !== 0) return ptsDiff;
-            // Tier 3: Higher elims first
+
+            // T3: Higher elims
             const elimsDiff = b.elims - a.elims;
             if (elimsDiff !== 0) return elimsDiff;
-            // Tier 4: Frozen slot — stable tie-breaker
-            const slotA = frozenOrder.indexOf(a.name);
-            const slotB = frozenOrder.indexOf(b.name);
-            return (slotA === -1 ? 9999 : slotA) - (slotB === -1 ? 9999 : slotB);
+
+            // T4: Persistent slot order — first-seen wins, survives refresh
+            const slotA = savedSlots[a.name] ?? 9999;
+            const slotB = savedSlots[b.name] ?? 9999;
+            if (slotA !== slotB) return slotA - slotB;
+
+            // T5: Alphabetical fallback (deterministic, never random)
+            return a.name.localeCompare(b.name);
         });
 
         setTeams(sorted);
@@ -476,4 +508,3 @@ export default function MatchRankingGraphic({
         </AnimatePresence>
     );
 }
-
