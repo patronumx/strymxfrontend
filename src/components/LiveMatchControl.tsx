@@ -337,7 +337,8 @@ export default function LiveMatchControl() {
 
     const alivePlayers = validPlayers.filter(p => p.health > 0).length;
     const deadPlayers = validPlayers.filter(p => p.health <= 0).length;
-    const activeTeams = new Set(validPlayers.filter(p => p.health > 0).map(p => p.teamName)).size;
+    // Group by both ID and Name to ensure unique team counting even with placeholder names
+    const activeTeams = new Set(validPlayers.filter(p => p.health > 0).map(p => `${p.teamId}-${p.teamName}`)).size;
     const topDamageLeaders = [...validPlayers]
         .sort((a, b) => {
             if (b.killNum !== a.killNum) {
