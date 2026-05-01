@@ -428,14 +428,31 @@ export default function LiveMatchControl() {
     }, [validPlayers]);
 
     const isPlayerAlive = (p: PlayerStat) => {
-        if (p.liveState !== undefined) return p.liveState < 2;
+        // liveState: 0=Alive, 1=Knocked, 2=Dead
+        if (p.liveState !== undefined && p.liveState !== null) return p.liveState < 2;
         return p.health > 0;
     };
 
-    const alivePlayers = validPlayers.filter(isPlayerAlive).length;
-    const deadPlayers = validPlayers.filter(p => !isPlayerAlive(p)).length;
+    // Detect if the data is a stale "lobby reset" state where everyone was reset to alive
+    // This happens when the backend detects a new lobby and resets all players to health=100, liveState=0
+    const isDataStale = !lastUpdate || (Date.now() - lastUpdate) > 30000;
+    const allPlayersIdenticalAliveState = validPlayers.length > 0 && validPlayers.every(p => (p.liveState === 0 || p.liveState === undefined || p.liveState === null));
+    const isLobbyResetState = isDataStale && allPlayersIdenticalAliveState;
+
+    // Log alive/dead diagnostic info
+    if (validPlayers.length > 0) {
+        const liveStateCounts = validPlayers.reduce((acc, p) => {
+            const state = p.liveState ?? 'undef';
+            acc[state] = (acc[state] || 0) + 1;
+            return acc;
+        }, {} as Record<string | number, number>);
+        console.log(`[STRYMX-KPI] Players: ${validPlayers.length} | liveState dist:`, liveStateCounts, `| Stale: ${isDataStale} | LobbyReset: ${isLobbyResetState}`);
+    }
+
+    const alivePlayers = isLobbyResetState ? 0 : validPlayers.filter(isPlayerAlive).length;
+    const deadPlayers = isLobbyResetState ? 0 : validPlayers.filter(p => !isPlayerAlive(p)).length;
     // Group by both ID and Name to ensure unique team counting even with placeholder names
-    const activeTeams = new Set(validPlayers.filter(isPlayerAlive).map(p => `${p.teamId}-${p.teamName}`)).size;
+    const activeTeams = isLobbyResetState ? 0 : new Set(validPlayers.filter(isPlayerAlive).map(p => `${p.teamId}-${p.teamName}`)).size;
     const topDamageLeaders = [...validPlayers]
         .sort((a, b) => {
             if (b.killNum !== a.killNum) {
