@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { io } from 'socket.io-client';
 import { useSearchParams } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
-import { WS_URL } from '@/lib/api-config';
+import { WS_URL , API_URL} from '@/lib/api-config';
 
 function DynamicOverlayEngine() {
     const { theme, isTransparent: themeTransparent, isDataOnly: themeDataOnly } = useTheme();
@@ -18,7 +18,7 @@ function DynamicOverlayEngine() {
     // 1. Fetch Profile
     useEffect(() => {
         if (!profileId) return;
-        fetch(`http://${window.location.hostname}:4000/api/overlay-templates/${profileId}`)
+        fetch(`${API_URL}/api/overlay-templates/${profileId}`)
             .then(r => r.json())
             .then(data => {
                 if (data && data.elements) {

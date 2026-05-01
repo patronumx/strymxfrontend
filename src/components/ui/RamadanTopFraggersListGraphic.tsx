@@ -24,10 +24,10 @@ interface GraphicCommand {
 }
 
 const mockFraggers = [
-    { name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: 'http://localhost:3001/images/default.png', logoUrl: '/placeholder-logo.png' },
-    { name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: 'http://localhost:3001/images/default.png', logoUrl: '/placeholder-logo.png' },
-    { name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: 'http://localhost:3001/images/default.png', logoUrl: '/placeholder-logo.png' },
-    { name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: 'http://localhost:3001/images/default.png', logoUrl: '/placeholder-logo.png' },
+    { name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: '${typeof window !== "undefined" ? window.location.origin : ""}/images/default.png', logoUrl: '/placeholder-logo.png' },
+    { name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: '${typeof window !== "undefined" ? window.location.origin : ""}/images/default.png', logoUrl: '/placeholder-logo.png' },
+    { name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: '${typeof window !== "undefined" ? window.location.origin : ""}/images/default.png', logoUrl: '/placeholder-logo.png' },
+    { name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: '${typeof window !== "undefined" ? window.location.origin : ""}/images/default.png', logoUrl: '/placeholder-logo.png' },
 ];
 
 export default function RamadanTopFraggersListGraphic() {
@@ -68,7 +68,7 @@ export default function RamadanTopFraggersListGraphic() {
 
                 // Ensure exactly 4 rows render
                 while (topFour.length < 4) {
-                    topFour.push({ name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: 'http://localhost:3001/images/default.png', logoUrl: '/placeholder-logo.png' });
+                    topFour.push({ name: 'PLAYER NAME', teamTag: 'TEAM TAG', damage: 0, elims: 0, surTime: '00:00', photoUrl: '${typeof window !== "undefined" ? window.location.origin : ""}/images/default.png', logoUrl: '/placeholder-logo.png' });
                 }
 
                 setFraggers(topFour);
@@ -105,8 +105,8 @@ export default function RamadanTopFraggersListGraphic() {
                                 {/* Photo Area: Absolutely positioned covering the empty grey suit spot */}
                                 <div className="absolute left-[0px] w-[115px] h-[115px] bg-white overflow-hidden flex items-end justify-center">
                                     <img
-                                        src={p.photoUrl || 'http://localhost:3001/images/default.png'}
-                                        onError={(e) => { e.currentTarget.src = 'http://localhost:3001/images/default.png'; e.currentTarget.onerror = null; }}
+                                        src={p.photoUrl || '${typeof window !== "undefined" ? window.location.origin : ""}/images/default.png'}
+                                        onError={(e) => { e.currentTarget.src = '${typeof window !== "undefined" ? window.location.origin : ""}/images/default.png'; e.currentTarget.onerror = null; }}
                                         className="h-full object-cover relative pointer-events-none"
                                         alt=""
                                     />

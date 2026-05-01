@@ -1085,7 +1085,7 @@ export default function LiveMatchControl() {
                                     {teamRankings[0].players.slice(0, 4).map((p, i) => (
                                         <div key={i} className="relative group/player">
                                             <img 
-                                                src={`http://${window.location.hostname}:4000/images/${p.playerKey}.png`} 
+                                                src={`${API_URL}/images/${p.playerKey}.png`} 
                                                 onError={(e) => { 
                                                     e.currentTarget.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
                                                     e.currentTarget.onerror = null; 
@@ -2162,7 +2162,7 @@ export default function LiveMatchControl() {
                         >
                             <div className="relative mb-6 flex justify-center">
                                 <img 
-                                    src={`http://${window.location.hostname}:4000/images/${headToHeadPlayers[1].playerKey}.png`} 
+                                    src={`${API_URL}/images/${headToHeadPlayers[1].playerKey}.png`} 
                                     onError={(e) => { 
                                         e.currentTarget.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; 
                                         e.currentTarget.onerror = null; 

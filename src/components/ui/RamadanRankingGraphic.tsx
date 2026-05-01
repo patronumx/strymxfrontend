@@ -242,7 +242,7 @@ export default function RamadanRankingGraphic({ matchId = "test-match-001" }: { 
                 playerKey: p.playerKey,
                 health: p.health || 0,
                 liveState: p.liveState !== undefined ? p.liveState : 0,
-                photoUrl: p.photoUrl ? `http://localhost:3001/images/${p.playerKey}.png` : 'http://localhost:3001/images/default.png'
+                photoUrl: p.photoUrl ? `${typeof window !== "undefined" ? window.location.origin : ""}/images/${p.playerKey}.png` : '${typeof window !== "undefined" ? window.location.origin : ""}/images/default.png'
             };
             if (existingIdx >= 0) {
                 t.players![existingIdx] = playerEntry; // update existing

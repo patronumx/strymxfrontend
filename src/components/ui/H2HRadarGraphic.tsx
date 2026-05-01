@@ -116,8 +116,8 @@ export function PlayerCard({
     config: HeadToHeadConfig;
 }) {
     const isDummy = player.playerKey?.startsWith('dummy') || player.playerKey?.startsWith('m');
-    const photoSrc = player.photoUrl || (!isDummy ? `http://${backendHost}:4000/images/${player.playerKey}.png` : null);
-    const logoSrc  = player.logoUrl  || (!isDummy ? `http://${backendHost}:4000/logos/${player.teamName}.png`  : null);
+    const photoSrc = player.photoUrl || (!isDummy ? `${API_URL}/images/${player.playerKey}.png` : null);
+    const logoSrc  = player.logoUrl  || (!isDummy ? `${API_URL}/logos/${player.teamName}.png`  : null);
     const [imgFailed,  setImgFailed]  = useState(false);
     const [logoFailed, setLogoFailed] = useState(false);
     const accentColor  = config.vsBadgeColor  || '#FF3D60';

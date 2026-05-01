@@ -1,5 +1,5 @@
 "use client"
-import { WS_URL } from '@/lib/api-config';
+import { WS_URL , API_URL} from '@/lib/api-config';
 import React, { useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { Save, Plus, Type, Image as ImageIcon, Send, LayoutGrid, Trash2, CheckCircle2, Copy, X } from 'lucide-react';
@@ -117,7 +117,7 @@ export default function OverlayMapperPage() {
         });
 
         try {
-            await fetch(`http://${window.location.hostname}:4000/api/overlay-templates`, {
+            await fetch(`${API_URL}/api/overlay-templates`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

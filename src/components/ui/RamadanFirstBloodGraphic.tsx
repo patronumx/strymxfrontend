@@ -78,7 +78,7 @@ export default function RamadanFirstBloodGraphic() {
                             className="relative z-10 h-full w-[350px] flex items-end justify-center ml-12"
                         >
                             <img 
-                                src={player.photoUrl || `http://localhost:3001/images/${player.playerKey}.png`}
+                                src={player.photoUrl || `${typeof window !== "undefined" ? window.location.origin : ""}/images/${player.playerKey}.png`}
                                 alt={player.name}
                                 className="h-[120%] object-contain drop-shadow-[0_20px_20px_rgba(0,0,0,0.5)]"
                                 onError={(e) => {

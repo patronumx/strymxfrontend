@@ -54,7 +54,7 @@ function PlayerPortrait({ photoUrl, playerKey, name, backendHost, themeColor, fl
                     onError={() => {
                         // Fallback to backend port 4000 if 3000 fails
                         if (imgSrc?.includes(':3000')) {
-                            setImgSrc(`http://${backendHost}:4000/images/${playerKey}.png`);
+                            setImgSrc(`${API_URL}/images/${playerKey}.png`);
                         } else {
                             setFailed(true);
                         }

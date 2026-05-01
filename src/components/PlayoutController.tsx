@@ -6,10 +6,10 @@ import { Play, Square, RefreshCcw, Monitor, Image as ImageIcon, Terminal, Zap } 
 import { motion } from 'framer-motion';
 
 const GRAPHICS = [
-    { id: 'match-ranking', name: 'Match Ranking (Top 8)', layer: 20, url: 'http://localhost:3001/overlays/match-rankings', color: 'from-blue-500 to-indigo-600' },
-    { id: 'wwcd', name: 'WWCD Team Stats', layer: 21, url: 'http://localhost:3001/overlays/wwcd', color: 'from-amber-500 to-orange-600' },
-    { id: 'mvp', name: 'MVP Spotlight', layer: 22, url: 'http://localhost:3001/overlays/mvp', color: 'from-emerald-500 to-teal-600' },
-    { id: 'grenade-kill', name: 'Grenade Elimination', layer: 23, url: 'http://localhost:3001/overlays/grenade-kill', color: 'from-lime-500 to-green-600' },
+    { id: 'match-ranking', name: 'Match Ranking (Top 8)', layer: 20, url: '${typeof window !== "undefined" ? window.location.origin : ""}/overlays/match-rankings', color: 'from-blue-500 to-indigo-600' },
+    { id: 'wwcd', name: 'WWCD Team Stats', layer: 21, url: '${typeof window !== "undefined" ? window.location.origin : ""}/overlays/wwcd', color: 'from-amber-500 to-orange-600' },
+    { id: 'mvp', name: 'MVP Spotlight', layer: 22, url: '${typeof window !== "undefined" ? window.location.origin : ""}/overlays/mvp', color: 'from-emerald-500 to-teal-600' },
+    { id: 'grenade-kill', name: 'Grenade Elimination', layer: 23, url: '${typeof window !== "undefined" ? window.location.origin : ""}/overlays/grenade-kill', color: 'from-lime-500 to-green-600' },
 ];
 
 export default function PlayoutController() {

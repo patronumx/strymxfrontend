@@ -330,7 +330,7 @@ export default function LiveRankingsGraphicV2() {
                             {topPlayers.slice(0, 4).map((p, idx) => (
                                 <div key={idx} className="relative overflow-hidden bg-slate-800">
                                     <img 
-                                        src={`http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:4000/images/${p.playerKey}.png`} 
+                                        src={`${API_URL}/images/${p.playerKey}.png`} 
                                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                         className="w-full h-full object-cover object-top" 
                                         alt="" 

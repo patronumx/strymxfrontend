@@ -4,11 +4,9 @@
  * across components and handle IPv4/IPv6 localhost resolution.
  */
 
-export const BACKEND_PORT = 4000;
+import { API_URL } from './api-config';
 
-// On Windows, 'localhost' is generally safer for browser loopback than 127.0.0.1
-// as it handles both IPv4 and IPv6 resolution.
-export const BASE_URL = `http://localhost:${BACKEND_PORT}`;
+export const BASE_URL = API_URL;
 
 export const API_ENDPOINTS = {
     TOURNAMENTS: `${BASE_URL}/api/tournaments`,
