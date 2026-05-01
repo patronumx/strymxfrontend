@@ -135,49 +135,6 @@ export default function LiveMatchControl() {
         }, 5000);
     };
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-    const [persistentRoster, setPersistentRoster] = useState<Map<string, PlayerStat>>(new Map());
-
-    // Update Persistent Roster Registry whenever socket players change
-    useEffect(() => {
-        if (players.length === 0) return;
-        
-        setPersistentRoster(prev => {
-            const next = new Map(prev);
-            players.forEach(p => {
-                const pk = p.playerKey || (p as any).PlayerKey;
-                if (!pk) return;
-                
-                const isUnknown = !p.name || p.name === 'Unknown' || p.name === '-';
-                const hasNoStats = (p.killNum || 0) === 0 && (p.damage || 0) === 0;
-                
-                // Skip placeholder ghosts unless they are already in the roster
-                if (isUnknown && hasNoStats && !next.has(pk)) return;
-                
-                const existing = next.get(pk);
-                if (!existing) {
-                    next.set(pk, p);
-                } else {
-                    const existingIsUnknown = !existing.name || existing.name === 'Unknown' || existing.name === '-';
-                    
-                    // If we now have a real name, prioritize it
-                    if (existingIsUnknown && !isUnknown) {
-                        next.set(pk, { ...existing, ...p });
-                    } else {
-                        // Merge stats, taking the maximums for cumulative metrics to handle partial packets
-                        next.set(pk, {
-                            ...existing,
-                            ...p,
-                            killNum: Math.max(existing.killNum || 0, p.killNum || 0),
-                            damage: Math.max(existing.damage || 0, p.damage || 0),
-                            health: p.health !== undefined ? p.health : existing.health,
-                            liveState: p.liveState !== undefined ? p.liveState : existing.liveState
-                        });
-                    }
-                }
-            });
-            return next;
-        });
-    }, [players]);
 
 
     // Backup Mode
@@ -323,7 +280,6 @@ export default function LiveMatchControl() {
                 if (data.category === 'MANUAL_RESET') {
                     console.log(`[STRYMX-WS] 🔄 Manual reset detected. Clearing all state.`);
                     setPlayers([]);
-                    setPersistentRoster(new Map());
                     localStorage.removeItem('strymx_team_slots');
                 }
                 setLastUpdate(data.timestamp);
@@ -349,8 +305,27 @@ export default function LiveMatchControl() {
     }, []);
 
     const validPlayers = React.useMemo(() => {
-        return Array.from(persistentRoster.values());
-    }, [persistentRoster]);
+        const uniquePlayerMap = new Map<string, any>();
+        players.forEach(p => {
+            const existing = uniquePlayerMap.get(p.playerKey);
+            if (!existing) {
+                uniquePlayerMap.set(p.playerKey, p);
+            } else {
+                // Keep whichever version has more recent/complete data
+                if ((p.killNum ?? 0) >= (existing.killNum ?? 0) &&
+                    (p.damage ?? 0) >= (existing.damage ?? 0)) {
+                    uniquePlayerMap.set(p.playerKey, p);
+                }
+            }
+        });
+
+        return Array.from(uniquePlayerMap.values()).filter(p => {
+            const isUnknown = !p.name || p.name === 'Unknown' || p.name === '-';
+            const hasNoStats = (p.killNum || 0) === 0 && (p.damage || 0) === 0;
+            if (isUnknown && hasNoStats) return false;
+            return true;
+        });
+    }, [players]);
 
     const teamRankings = React.useMemo(() => {
         // ── Deduplicate players by playerKey ──────────────────────────────────
@@ -541,7 +516,6 @@ export default function LiveMatchControl() {
             console.log('Reset successful');
             localStorage.removeItem('strymx_team_slots'); // Clear team slot order for fresh match
             setPlayers([]); // Optimistically clear frontend
-            setPersistentRoster(new Map()); // CLEAR THE PERMANENT ROSTER
             setIsResetModalOpen(false);
             showNotification('Match reset successfully!', 'success');
         } catch (e: any) {
