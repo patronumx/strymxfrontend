@@ -201,7 +201,13 @@ export default function LiveMatchControl() {
     const [selectedStage, setSelectedStage] = useState('');
     const [selectedTargetMatch, setSelectedTargetMatch] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [agentMatchId, setAgentMatchId] = useState('pmtm-s4-match-1');
     const [liveTournamentId, setLiveTournamentId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const savedAgentId = localStorage.getItem('strymx_agent_match_id');
+        if (savedAgentId) setAgentMatchId(savedAgentId);
+    }, []);
 
     const toggleLive = () => {
         if (!selectedTournament) return;
@@ -221,7 +227,9 @@ export default function LiveMatchControl() {
         
         const backendUrl = WS_URL;
         
-        fetch(`${backendUrl}/api/match-state/test-match-001`)
+        const currentAgentId = localStorage.getItem('strymx_agent_match_id') || 'pmtm-s4-match-1';
+        
+        fetch(`${backendUrl}/api/match-state/${currentAgentId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.activePlayers && data.activePlayers.length > 0) {
@@ -408,7 +416,7 @@ export default function LiveMatchControl() {
             const response = await fetch(`${API_URL}/api/agent/reset`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ matchId: 'test-match-001' })
+                body: JSON.stringify({ matchId: agentMatchId })
             });
             
             if (!response.ok) {
@@ -455,7 +463,7 @@ export default function LiveMatchControl() {
             const res = await fetch(`${backendUrl}/api/matches/${selectedTargetMatch}/save-live-data`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sourceMatchId: 'test-match-001' })
+                body: JSON.stringify({ sourceMatchId: agentMatchId })
             });
             if (res.ok) {
                 const data = await res.json();
@@ -742,7 +750,23 @@ export default function LiveMatchControl() {
 
                         {/* Breadcrumb Flow */}
                         <div className="flex items-center gap-2 flex-1">
-                            {/* Tournament Selector */}
+                        {/* Agent ID Input */}
+                        <div className="relative group min-w-[140px]">
+                            <Activity size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-pink-400 transition-colors z-10" />
+                            <input 
+                                type="text"
+                                placeholder="Agent ID"
+                                title="This must match the Match ID you entered in the Connector agent"
+                                value={agentMatchId}
+                                onChange={(e) => {
+                                    setAgentMatchId(e.target.value);
+                                    localStorage.setItem('strymx_agent_match_id', e.target.value);
+                                }}
+                                className="w-full bg-slate-950/40 border border-slate-800/60 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-pink-500/50 focus:bg-slate-900/60 transition-all font-bold placeholder:text-slate-700"
+                            />
+                        </div>
+
+                        {/* Tournament Selector */}
                             <div className="relative group min-w-[180px]">
                                 <Trophy size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors z-10" />
                                 <select 
