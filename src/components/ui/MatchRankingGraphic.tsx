@@ -290,7 +290,12 @@ export default function MatchRankingGraphic({
         });
 
         socket.on('match_state_update', (data) => {
-            console.log('[SOCKET] Match state update received:', data.matchId);
+            // Filter by matchId to prevent cross-match data pollution
+            if (data.matchId && data.matchId !== matchId) {
+                console.warn(`[OVERLAY-WS] ⛔ REJECTED update from match "${data.matchId}" (this overlay tracks: "${matchId}")`);
+                return;
+            }
+            console.log(`[OVERLAY-WS] ✅ ACCEPTED | Match: "${data.matchId}" | Players: ${data.activePlayers?.length || 0} | Category: ${data.category || 'N/A'}`);
             if (data.activePlayers) processData(data.activePlayers, data.matchInfo);
         });
 

@@ -240,6 +240,7 @@ export default function LiveMatchControl() {
 
     // Save to Match State (Sticky Bar)
     const [scheduledMatches, setScheduledMatches] = useState<any[]>([]);
+
     const [tournaments, setTournaments] = useState<any[]>([]);
     const [selectedTournament, setSelectedTournament] = useState('');
     const [selectedStage, setSelectedStage] = useState('');
@@ -252,6 +253,7 @@ export default function LiveMatchControl() {
         const savedAgentId = localStorage.getItem('strymx_agent_match_id');
         if (savedAgentId) setAgentMatchId(savedAgentId);
     }, []);
+
 
     const toggleLive = () => {
         if (!selectedTournament) return;
@@ -272,38 +274,83 @@ export default function LiveMatchControl() {
         const backendUrl = WS_URL;
         
         const currentAgentId = localStorage.getItem('strymx_agent_match_id') || 'pmtm-s4-match-1';
+        console.log(`[STRYMX-INIT] Dashboard booting. Agent Match ID: "${currentAgentId}"`);
         
         fetch(`${backendUrl}/api/match-state/${currentAgentId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.activePlayers && data.activePlayers.length > 0) {
+                    console.log(`[STRYMX-INIT] Initial fetch for "${currentAgentId}": ${data.activePlayers.length} players loaded`);
                     setPlayers(data.activePlayers);
                     if (data.timestamp) setLastUpdate(data.timestamp);
+                } else {
+                    console.log(`[STRYMX-INIT] Initial fetch for "${currentAgentId}": No players found (empty match)`);
                 }
             })
-            .catch(err => console.warn("Initial fetch error:", err));
+            .catch(err => console.warn("[STRYMX-INIT] Initial fetch error:", err));
 
         const newSocket = io(backendUrl);
         setSocket(newSocket);
 
-        newSocket.on('connect', () => setIsConnected(true));
-        newSocket.on('disconnect', () => setIsConnected(false));
+        newSocket.on('connect', () => {
+            console.log('[STRYMX-WS] Connected to backend');
+            setIsConnected(true);
+        });
+        newSocket.on('disconnect', () => {
+            console.log('[STRYMX-WS] Disconnected from backend');
+            setIsConnected(false);
+        });
 
         // Load live tournament state
         setLiveTournamentId(localStorage.getItem('strymx_active_tournament_id'));
 
         newSocket.on('match_state_update', (data) => {
+            // ═══════════════════════════════════════════════════════════════════
+            // CRITICAL: Filter by matchId to prevent cross-match data pollution
+            // The backend broadcasts ALL match updates on the same socket.
+            // Without this gate, data from match-4 would merge into match-5.
+            // ═══════════════════════════════════════════════════════════════════
+            const expectedMatchId = localStorage.getItem('strymx_agent_match_id') || 'pmtm-s4-match-1';
+            const incomingMatchId = data.matchId;
+
+            if (incomingMatchId && incomingMatchId !== expectedMatchId) {
+                console.warn(`[STRYMX-WS] ⛔ REJECTED update from match "${incomingMatchId}" (expected: "${expectedMatchId}"). This data belongs to a different match.`);
+                return; // DISCARD — wrong match
+            }
+
+            if (!data.activePlayers || data.activePlayers.length === 0) {
+                console.log(`[STRYMX-WS] ⚠️ Empty player array from match "${incomingMatchId || 'unknown'}". Category: ${data.category || 'N/A'}`);
+                if (data.category === 'MANUAL_RESET') {
+                    console.log(`[STRYMX-WS] 🔄 Manual reset detected. Clearing all state.`);
+                    setPlayers([]);
+                    setPersistentRoster(new Map());
+                    localStorage.removeItem('strymx_team_slots');
+                }
+                setLastUpdate(data.timestamp);
+                return;
+            }
+
+            const uniqueKeys = new Set(data.activePlayers.map((p: any) => p.playerKey)).size;
+            const teamNames = new Set(data.activePlayers.map((p: any) => p.teamName));
+            console.log(
+                `[STRYMX-WS] ✅ ACCEPTED update | Match: "${incomingMatchId}" | Players: ${data.activePlayers.length} (${uniqueKeys} unique) | Teams: ${teamNames.size} | Category: ${data.category || 'N/A'}`
+            );
+
             setLastUpdate(data.timestamp);
-            if (data.activePlayers) setPlayers(data.activePlayers);
+            setPlayers(data.activePlayers);
         });
 
         newSocket.on('data_ingested', () => {
-            console.log("Live Telemetry Synced");
+            console.log("[STRYMX-WS] Live Telemetry Synced");
             lastToastTime.current = Date.now();
         });
 
         return () => { newSocket.close(); };
     }, []);
+
+    const validPlayers = React.useMemo(() => {
+        return Array.from(persistentRoster.values());
+    }, [persistentRoster]);
 
     const teamRankings = React.useMemo(() => {
         // ── Deduplicate players by playerKey ──────────────────────────────────
@@ -380,10 +427,6 @@ export default function LiveMatchControl() {
             return a.name.localeCompare(b.name);
         });
     }, [validPlayers]);
-
-    const validPlayers = React.useMemo(() => {
-        return Array.from(persistentRoster.values());
-    }, [persistentRoster]);
 
     const matchSummaryStats = React.useMemo(() => {
         const stats = {

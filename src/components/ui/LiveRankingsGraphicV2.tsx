@@ -110,7 +110,13 @@ export default function LiveRankingsGraphicV2() {
             .catch(err => console.warn("Initial fetch error:", err));
 
         const socket = io(WS_URL);
-        socket.on('match_state_update', handleUpdate);
+        socket.on('match_state_update', (data) => {
+            // Filter by matchId to prevent cross-match data pollution
+            if (data.matchId && data.matchId !== matchId) {
+                return; // Wrong match, discard silently
+            }
+            handleUpdate(data);
+        });
 
         socket.on('layout_push', (data: { overlayKey: string; layout: Record<string, any> }) => {
             if (data.overlayKey !== OVERLAY_KEY) return;
