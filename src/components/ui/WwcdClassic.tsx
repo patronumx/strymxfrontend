@@ -1,87 +1,5 @@
 "use client"
 import { API_URL } from '@/lib/api-config';
-
-import React, { useEffect, useState, useMemo } from 'react';
-import { useTheme } from '@/context/ThemeContext';
-import { type WwcdConfig, defaultWwcdConfig } from '@/context/OverlayConfigContext';
-import { io } from 'socket.io-client';
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
-import { Crown, Target, TrendingUp, Clock, Zap } from 'lucide-react';
-
-interface PlayerStat {
-    playerKey: string;
-    name: string;
-    teamName: string;
-    killNum: number;
-    damage: number;
-    survivalTime: number;
-    rank?: number;
-    placement?: number;
-    logoUrl?: string;
-}
-
-function WwcdStatsContent() {
-    const { theme } = useTheme();
-    const searchParams = useSearchParams();
-    const isDataOnly = searchParams.get('dataOnly') === 'true';
-    const isTransparent = searchParams.get('transparent') === 'true' || isDataOnly;
-    const [fetchedData, setFetchedData] = useState<PlayerStat[]>([]);
-
-    useEffect(() => {
-        const socket = io(`${API_URL}`);
-        socket.on('connect', () => console.log('WWCD Stats connected'));
-        socket.on('match_state_update', (data) => {
-            if (data && data.activePlayers) setFetchedData(data.activePlayers);
-        });
-        return () => { socket.disconnect(); };
-    }, []);
-
-    const [config, setConfig] = useState<WwcdConfig>(defaultWwcdConfig);
-
-    useEffect(() => {
-        const saved = localStorage.getItem('strymx_overlay_configs');
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if (parsed['wwcd-stats']) setConfig(prev => ({ ...prev, ...parsed['wwcd-stats'] }));
-            } catch (e) {}
-        }
-    }, []);
-
-    useEffect(() => {
-        const handleMessage = (e: MessageEvent) => {
-            if (e.data?.type === 'strymx_overlay_config' && e.data.overlayType === 'wwcd-stats' && e.data.config) {
-                setConfig(prev => ({ ...prev, ...e.data.config }));
-            }
-            if (e.data?.type === 'strymx_batch_update' && e.data.overlayType === 'wwcd-stats' && e.data.config) {
-                setConfig(prev => ({ ...prev, ...e.data.config }));
-            }
-        };
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, []);
-
-    const [scale, setScale] = useState(1);
-    useEffect(() => {
-        const handleResize = () => setScale(Math.min(window.innerWidth / 1920, window.innerHeight / 1080, 1));
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const wwcdTeamInfo = useMemo(() => {
-        if (!fetchedData || fetchedData.length === 0) return { teamName: 'WAITING FOR DATA', players: [], logoUrl: '' };
-
-        const validPlayers = fetchedData.filter(p => p.name && p.name !== 'Unknown');
-        const teams = validPlayers.reduce((acc: any, player) => {
-            if (!acc[player.teamName]) acc[player.teamName] = { players: [], totalScore: 0, isWWCD: false, logoUrl: player.logoUrl };
-            acc[player.teamName].players.push(player);
-            acc[player.teamName].totalScore += player.killNum + (player.damage / 100);
-            if (player.placement === 1 || player.rank === 1) acc[player.teamName].isWWCD = true;
-            return acc;
-        }, {});
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { type WwcdConfig, defaultWwcdConfig } from '@/context/OverlayConfigContext';
@@ -109,6 +27,7 @@ function WwcdStatsContent() {
     const isDataOnly = searchParams.get('dataOnly') === 'true';
     const isTransparent = searchParams.get('transparent') === 'true' || isDataOnly;
     const [fetchedData, setFetchedData] = useState<PlayerStat[]>([]);
+    const [config, setConfig] = useState<WwcdConfig>(defaultWwcdConfig);
 
     useEffect(() => {
         const socket = io(`${API_URL}`);
@@ -118,8 +37,6 @@ function WwcdStatsContent() {
         });
         return () => { socket.disconnect(); };
     }, []);
-
-    const [config, setConfig] = useState<WwcdConfig>(defaultWwcdConfig);
 
     useEffect(() => {
         const saved = localStorage.getItem('strymx_overlay_configs');
