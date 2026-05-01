@@ -408,7 +408,7 @@ export default function TournamentDetails() {
                                                 tournament.teams.map((ta: any) => (
                                                     <div key={ta.teamId} className="bg-slate-950/50 border border-slate-800 hover:border-amber-500/30 transition-all rounded-xl p-4 flex items-center gap-4 relative group">
                                                         <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center font-black text-lg text-slate-600">
-                                                            {ta.team.countryFlag || 'TEAM'}
+                                                            {ta.team.logoUrl ? <img src={ta.team.logoUrl} className="w-full h-full object-contain p-1" /> : (ta.team.countryFlag || 'TEAM')}
                                                         </div>
                                                         <div className="flex-1">
                                                             <h4 className="font-black text-white text-lg tracking-tight uppercase line-clamp-1 pr-6">{ta.team.name.replace(/^SCOUT\s+/i, '')}</h4>
