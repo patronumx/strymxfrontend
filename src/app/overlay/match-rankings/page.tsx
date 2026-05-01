@@ -73,8 +73,9 @@ export function MatchRankingsContent({ designerMode = false }: { designerMode?: 
             if ((nameStr === '' || nameStr === 'Unknown') && (!p.damage && !p.killNum)) return;
 
             const tName = p.teamName || p.teamId || 'Unknown';
+            const tTag = p.teamTag || tName.slice(0, 3).toUpperCase();
             if (!teamMap.has(tName)) {
-                teamMap.set(tName, { teamName: tName, elims: 0, placePts: 0, totalPts: 0, players: [], logoUrl: p.logoUrl });
+                teamMap.set(tName, { teamName: tName, teamTag: tTag, elims: 0, placePts: 0, totalPts: 0, players: [], logoUrl: p.logoUrl });
             }
 
             const team = teamMap.get(tName);
@@ -208,7 +209,7 @@ export function MatchRankingsContent({ designerMode = false }: { designerMode?: 
                                     <div className="h-20 w-[4px] rounded-full shrink-0" style={{ backgroundColor: `${config.totalBadgeColor}33` }} />
                                     <div className="flex flex-col flex-1 min-w-0 pr-4">
                                         <h2 className="text-6xl font-black text-slate-800 uppercase tracking-tighter italic leading-none whitespace-normal break-words py-1">
-                                            {topTeam.teamName.replace(/^scout\s+/i, '')}
+                                            {topTeam.teamTag || topTeam.teamName.replace(/^scout\s+/i, '')}
                                         </h2>
                                     </div>
                                 </div>
@@ -312,7 +313,7 @@ export function MatchRankingsContent({ designerMode = false }: { designerMode?: 
                                                 )}
                                                 <div className="h-6 w-[2px] bg-slate-200 shrink-0" />
                                                 <span className="text-xl font-black text-slate-800 uppercase tracking-tighter italic whitespace-nowrap">
-                                                    {team.teamName.replace(/^scout\s+/i, '')}
+                                                    {team.teamTag || team.teamName.replace(/^scout\s+/i, '')}
                                                 </span>
                                             </div>
                                             {config.showPlaceColumn && (

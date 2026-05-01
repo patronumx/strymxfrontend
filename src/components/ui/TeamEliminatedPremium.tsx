@@ -176,7 +176,7 @@ export default function TeamEliminatedPremium() {
                                         fontWeight: allStyles[BLOCK_IDS.leftInfo].fontWeight || 700,
                                         fontStyle: allStyles[BLOCK_IDS.leftInfo].fontStyle || 'normal'
                                     }}>
-                                        {team.teamName.charAt(0)}
+                                        {team.teamTag || team.teamName.charAt(0)}
                                     </div>
                                 )}
                             </div>

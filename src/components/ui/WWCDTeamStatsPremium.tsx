@@ -26,6 +26,7 @@ interface PlayerStat {
 
 interface TeamScore {
     name: string;
+    teamTag?: string;
     logoUrl: string;
     players: PlayerStat[];
 }

@@ -173,7 +173,7 @@ function StandingsColumn({ teams, style }: { teams: StandingRow[], style: Elemen
                         {/* Team Info */}
                         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 15, paddingLeft: 20 }}>
                              <img src={t.logoUrl} onError={(e) => e.currentTarget.style.opacity = '0'} style={{ height: 45, width: 45, objectFit: 'contain' }} alt="" />
-                             <span style={{ fontSize: 32, fontWeight: 900, color: '#ff4b5c', fontFamily: font?.family, textTransform: 'uppercase' }}>{t.tag || 'TAG'}</span>
+                             <span style={{ fontSize: 32, fontWeight: 900, color: '#ff4b5c', fontFamily: font?.family, textTransform: 'uppercase' }}>{t.tag || t.teamName.slice(0, 3).toUpperCase()}</span>
                         </div>
 
                         {/* Stats */}

@@ -189,8 +189,9 @@ export default function LiveRankingsGraphicV2() {
             const nameStr = p.playerName || p.PlayerName || '';
             if ((nameStr === '' || nameStr === 'Unknown') && (!p.damage && !p.killNum)) return;
             const tName = p.teamName || p.teamId || 'Unknown';
+            const tTag = p.teamTag || tName.slice(0, 3).toUpperCase();
             if (!teamMap.has(tName)) {
-                teamMap.set(tName, { teamName: tName, elims: 0, placePts: 0, totalPts: 0, players: [], logoUrl: p.logoUrl });
+                teamMap.set(tName, { teamName: tName, teamTag: tTag, elims: 0, placePts: 0, totalPts: 0, players: [], logoUrl: p.logoUrl });
             }
             const team = teamMap.get(tName);
             team.players.push(p);
@@ -399,7 +400,7 @@ export default function LiveRankingsGraphicV2() {
                                             </svg>
                                         </div>
                                         <span className="font-black uppercase text-lg truncate drop-shadow-md relative z-10" style={{ color: style.textColor, fontFamily: style.fontFamily }}>
-                                            {team.teamName.replace(/^scout\s+/i, '')}
+                                            {team.teamTag || team.teamName.replace(/^scout\s+/i, '')}
                                         </span>
                                     </div>
                                     

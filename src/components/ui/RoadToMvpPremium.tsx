@@ -23,6 +23,7 @@ const VIEWPORT = { width: 1920, height: 1080 };
 interface PlayerStanding {
     playerName: string;
     teamName: string;
+    teamTag?: string;
     logoUrl?: string;
     photoUrl?: string;
     playerKey?: string;
@@ -191,7 +192,7 @@ function PlayerCard({ player, style, size = 'large' }: { player: PlayerStanding,
                 <div style={{ width: 8, height: isSmall ? 50 : 70, backgroundColor: accent }} />
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontSize: isSmall ? 28 : 36, fontWeight: 900, color: accent, fontFamily: font?.family, textTransform: 'uppercase', lineHeight: 1 }}>{player.playerName}</span>
-                    <span style={{ fontSize: isSmall ? 32 : 42, fontWeight: 900, color: textColor, fontFamily: font?.family, textTransform: 'uppercase', lineHeight: 1 }}>{player.teamName}</span>
+                    <span style={{ fontSize: isSmall ? 32 : 42, fontWeight: 900, color: textColor, fontFamily: font?.family, textTransform: 'uppercase', lineHeight: 1 }}>{player.teamTag || player.teamName}</span>
                 </div>
             </div>
         </div>

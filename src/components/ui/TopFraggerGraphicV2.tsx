@@ -22,6 +22,7 @@ interface PlayerStat {
     playerKey: string;
     name: string;
     teamName: string;
+    teamTag?: string;
     killNum: number;
     damage: number;
     survivalTime?: string | number;
@@ -124,7 +125,7 @@ function NameBannerBlock({ player, style }: { player: PlayerStat; style: Element
                 color: style.gradientEnd || '#1e293b',
                 letterSpacing: '0.15em', textTransform: 'uppercase',
                 fontFamily: font?.family,
-            }}>{player.teamName.replace(/^scout\s+/i, '')}</h2>
+            }}>{player.teamTag || player.teamName.replace(/^scout\s+/i, '')}</h2>
         </div>
     );
 }
