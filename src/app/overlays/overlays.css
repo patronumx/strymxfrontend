@@ -1,0 +1,70 @@
+/* Ramadan Series 2026 - Global Overlay Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@500;700&display=swap');
+
+:root {
+  --color-pink: #DE007B;
+  --color-lime: #95C11F;
+  --color-black: #121212;
+  --color-white: #FFFFFF;
+  --color-gray: #F5F5F5;
+  --font-body: 'Inter', sans-serif;
+  --font-display: 'Oswald', sans-serif;
+}
+
+.overlay-container {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-body);
+  color: var(--color-black);
+}
+
+.slanted-bg-pink {
+  background-color: var(--color-pink);
+  clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+}
+
+.slanted-bg-lime {
+  background-color: var(--color-lime);
+  clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.text-pink { color: var(--color-pink); }
+.text-lime { color: var(--color-lime); }
+
+.bg-pink { background-color: var(--color-pink); }
+.bg-lime { background-color: var(--color-lime); }
+
+.ramadan-header {
+  position: absolute;
+  top: 40px;
+  left: 60px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stat-bar-container {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  background: var(--color-gray);
+  position: relative;
+}
+
+.stat-bar-value {
+  padding: 0 20px;
+  font-weight: 900;
+  font-size: 24px;
+  z-index: 10;
+}
+
+.stat-bar-label {
+  flex: 1;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
