@@ -950,33 +950,21 @@ export default function LiveMatchControl() {
                                     <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/tourn:text-indigo-400 transition-colors" size={16} />
                                     <select 
                                         value={selectedTournament}
-                                        onChange={e => {
-                                            setSelectedTournament(e.target.value);
-                                            setSelectedStage('');
-                                        }}
-                                        className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3 pl-12 pr-10 text-[11px] font-black uppercase tracking-wider text-white focus:outline-none focus:border-indigo-500/50 transition-all appearance-none cursor-pointer"
-                                    >
-                                        <option value="">Filter By Tournament</option>
-                                        {tournaments.map(t => (
-                                            <option key={t.id} value={t.id}>{t.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                {selectedTournament && (
-                                    <button
-                                        onClick={toggleLive}
-                                        className={cn(
-                                            "px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shrink-0 flex items-center gap-2 border shadow-lg",
-                                            liveTournamentId === selectedTournament
-                                                ? "bg-emerald-500 border-emerald-400 text-white shadow-emerald-500/20 animate-pulse"
-                                                : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
-                                        )}
-                                    >
-                                        <div className={cn("w-2 h-2 rounded-full", liveTournamentId === selectedTournament ? "bg-white" : "bg-slate-500")} />
-                                        {liveTournamentId === selectedTournament ? "Live Sync Active" : "Set Live Context"}
-                                    </button>
-                                )}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setSelectedTournament(val);
+                                        setSelectedStage('');
+                                        if (val) handleSyncLiveContext(val);
+                                    }}
+                                    className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3 pl-12 pr-10 text-[11px] font-black uppercase tracking-wider text-white focus:outline-none focus:border-indigo-500/50 transition-all appearance-none cursor-pointer"
+                                >
+                                    <option value="">Filter By Tournament</option>
+                                    {tournaments.map(t => (
+                                        <option key={t.id} value={t.id}>{t.name}</option>
+                                    ))}
+                                </select>
                             </div>
+                        </div>
 
                             <div className="relative group/input">
                                 <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-emerald-500 transition-colors" size={18} />
