@@ -909,11 +909,14 @@ export default function LiveMatchControl() {
                                     className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-4 pl-12 pr-10 text-sm font-bold text-white focus:outline-none focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
                                 >
                                     <option value="">-- Choose a Scheduled Match --</option>
-                                    {scheduledMatches.map(m => (
-                                        <option key={m.id} value={m.id}>
-                                            {m.matchName || m.id} ({m.tournament?.name || 'Tournament'})
-                                        </option>
-                                    ))}
+                                    {scheduledMatches
+                                        .filter(m => m.status !== 'COMPLETED')
+                                        .map(m => (
+                                            <option key={m.id} value={m.id}>
+                                                {m.matchName || m.id} ({m.tournament?.name || 'Tournament'})
+                                            </option>
+                                        ))
+                                    }
                                     <option value="custom">-- Custom Match ID --</option>
                                 </select>
                                 <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none group-focus-within/input:rotate-90 transition-transform" size={16} />
