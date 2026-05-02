@@ -171,8 +171,10 @@ function StandingsColumn({ teams, style }: { teams: StandingRow[], style: Elemen
                         </div>
 
                         {/* Team Info */}
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 15, paddingLeft: 20 }}>
-                             <img src={t.logoUrl} onError={(e) => e.currentTarget.style.opacity = '0'} style={{ height: 45, width: 45, objectFit: 'contain' }} alt="" />
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 20, paddingLeft: 20 }}>
+                             <div style={{ width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 8 }}>
+                                <img src={t.logoUrl} onError={(e) => e.currentTarget.style.display = 'none'} style={{ maxHeight: '80%', maxWidth: '80%', objectFit: 'contain' }} alt="" />
+                             </div>
                              <span style={{ fontSize: 32, fontWeight: 900, color: '#ff4b5c', fontFamily: font?.family, textTransform: 'uppercase' }}>{t.tag || t.teamName.slice(0, 3).toUpperCase()}</span>
                         </div>
 
