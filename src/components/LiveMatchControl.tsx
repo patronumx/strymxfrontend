@@ -695,7 +695,7 @@ export default function LiveMatchControl() {
         }
     };
 
-    const handleResetMatch = async () => {
+    const handleResetMatchStandings = async () => {
         const targetId = selectedTargetMatch || agentMatchId;
         if (!targetId || targetId === 'custom') return showNotification("Please select a match to reset.", 'error');
 
@@ -1015,7 +1015,7 @@ export default function LiveMatchControl() {
                             <div className="flex flex-col gap-3 mt-5">
                                 {selectedTargetMatch && scheduledMatches.find(m => m.id === selectedTargetMatch)?.status === 'COMPLETED' ? (
                                     <button
-                                        onClick={handleResetMatch}
+                                        onClick={handleResetMatchStandings}
                                         disabled={isSaving}
                                         className="bg-rose-600 hover:bg-rose-500 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(225,29,72,0.3)] hover:shadow-[0_15px_40px_rgba(225,29,72,0.5)] hover:-translate-y-1 flex items-center gap-3"
                                     >
