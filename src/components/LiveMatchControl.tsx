@@ -659,6 +659,20 @@ export default function LiveMatchControl() {
         const targetId = selectedTargetMatch || agentMatchId;
         if (!targetId || targetId === 'custom') return showNotification("Please select a target match.", 'error');
         
+        // 1. Check if already saved (COMPLETED)
+        const existingMatch = scheduledMatches.find(m => m.id === targetId);
+        if (existingMatch?.status === 'COMPLETED') {
+            return showNotification("This match has already been saved and finalized.", 'info');
+        }
+
+        // 2. Check if match is actually finished (has a winner)
+        const hasWinner = validPlayers.some(p => p.rank === 1);
+        const teamsAlive = teamRankings.filter(t => t.placement === null || t.placement === undefined).length;
+        
+        if (!hasWinner && teamsAlive > 1) {
+            return showNotification("Match is still in progress! Wait for a Chicken Dinner before saving.", 'warning');
+        }
+
         setIsSaving(true);
         const backendUrl = WS_URL;
         try {
