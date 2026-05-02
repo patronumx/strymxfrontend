@@ -642,7 +642,9 @@ export default function LiveMatchControl() {
     };
 
     const handleSaveToMatch = async () => {
-        if (!selectedTargetMatch) return showNotification("Please select a target match.", 'error');
+        const targetId = selectedTargetMatch || agentMatchId;
+        if (!targetId || targetId === 'custom') return showNotification("Please select a target match.", 'error');
+        
         setIsSaving(true);
         const backendUrl = WS_URL;
         try {
@@ -899,7 +901,11 @@ export default function LiveMatchControl() {
                                 <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-emerald-500 transition-colors" size={18} />
                                 <select 
                                     value={agentMatchId}
-                                    onChange={(e) => setAgentMatchId(e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setAgentMatchId(val);
+                                        setSelectedTargetMatch(val); // Sync for saving!
+                                    }}
                                     className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-4 pl-12 pr-10 text-sm font-bold text-white focus:outline-none focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
                                 >
                                     <option value="">-- Choose a Scheduled Match --</option>
