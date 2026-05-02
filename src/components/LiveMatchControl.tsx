@@ -695,6 +695,33 @@ export default function LiveMatchControl() {
         }
     };
 
+    const handleResetMatch = async () => {
+        const targetId = selectedTargetMatch || agentMatchId;
+        if (!targetId || targetId === 'custom') return showNotification("Please select a match to reset.", 'error');
+
+        if (!window.confirm(`Are you sure you want to RESET standings for ${targetId}? This will delete all saved data for this match and re-open it.`)) {
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const res = await fetch(`${API_URL}/api/matches/${targetId}/reset`, {
+                method: 'POST'
+            });
+            if (res.ok) {
+                showNotification("Match reset successfully! Standings cleared.", 'success');
+                setSelectedTargetMatch('');
+                fetchDataForPersistence();
+            } else {
+                throw new Error("Failed to reset match.");
+            }
+        } catch (error: any) {
+            showNotification(error.message, 'error');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     // Stable Sorting for Telemetry Table
     const sortedTelemetryPlayers = React.useMemo(() => {
         return [...validPlayers].sort((a, b) => {
@@ -964,11 +991,10 @@ export default function LiveMatchControl() {
                                 >
                                     <option value="">-- Choose a Scheduled Match --</option>
                                     {scheduledMatches
-                                        .filter(m => m.status !== 'COMPLETED')
                                         .filter(m => !selectedTournament || m.tournamentId === selectedTournament)
                                         .map(m => (
                                             <option key={m.id} value={m.id}>
-                                                {m.matchName || m.id} ({m.tournament?.name || 'Tournament'})
+                                                {m.status === 'COMPLETED' ? '[SAVED] ' : ''}{m.matchName || m.id} ({m.tournament?.name || 'Tournament'})
                                             </option>
                                         ))
                                     }
@@ -986,17 +1012,28 @@ export default function LiveMatchControl() {
                                 <Zap size={20} fill="currentColor" /> Start Live Stream
                             </button>
                         ) : (
-                            <button
-                                onClick={async () => {
-                                    // 1. Save data first
-                                    await handleSaveToMatch();
-                                    // 2. Then stop connector
-                                    await handleStopConnector();
-                                }}
-                                className="bg-rose-500 hover:bg-rose-400 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(244,63,94,0.3)] hover:shadow-[0_15px_40px_rgba(244,63,94,0.5)] hover:-translate-y-1 flex items-center gap-3 mt-5"
-                            >
-                                <CheckCircle size={20} /> End Match & Save
-                            </button>
+                            <div className="flex flex-col gap-3 mt-5">
+                                {selectedTargetMatch && scheduledMatches.find(m => m.id === selectedTargetMatch)?.status === 'COMPLETED' ? (
+                                    <button
+                                        onClick={handleResetMatch}
+                                        disabled={isSaving}
+                                        className="bg-rose-600 hover:bg-rose-500 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(225,29,72,0.3)] hover:shadow-[0_15px_40px_rgba(225,29,72,0.5)] hover:-translate-y-1 flex items-center gap-3"
+                                    >
+                                        <X size={20} /> {isSaving ? 'Resetting...' : 'Reset Standings & Re-open Match'}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={async () => {
+                                            await handleSaveToMatch();
+                                            await handleStopConnector();
+                                        }}
+                                        disabled={isSaving}
+                                        className="bg-rose-500 hover:bg-rose-400 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(244,63,94,0.3)] hover:shadow-[0_15px_40px_rgba(244,63,94,0.5)] hover:-translate-y-1 flex items-center gap-3"
+                                    >
+                                        <CheckCircle size={20} /> {isSaving ? 'Saving...' : 'End Match & Save Standings'}
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
