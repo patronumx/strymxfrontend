@@ -416,18 +416,23 @@ export default function LiveMatchControl() {
         if (changed) { try { localStorage.setItem('strymx_team_slots', JSON.stringify(savedSlots)); } catch { /* ignore */ } }
 
         // ── Stable sort ────────────────────────────────────────────────────────
+        // ── Standard Tournament Sort: Points > Elims > Alive Status ──────────
         const teamIsEliminated = (t: TeamRanking) => t.placement !== null && t.placement !== undefined;
         return allTeams.sort((a, b) => {
+            // 1. Total Points (Primary)
+            const ptsDiff = b.totalPts - a.totalPts;
+            if (ptsDiff !== 0) return ptsDiff;
+
+            // 2. Eliminations (Secondary)
+            const elimsDiff = b.elims - a.elims;
+            if (elimsDiff !== 0) return elimsDiff;
+
+            // 3. Alive Status (Tertiary - Alive teams (0) before Eliminated (1))
             const aliveA = teamIsEliminated(a) ? 1 : 0;
             const aliveB = teamIsEliminated(b) ? 1 : 0;
             if (aliveA !== aliveB) return aliveA - aliveB;
-            const ptsDiff = b.totalPts - a.totalPts;
-            if (ptsDiff !== 0) return ptsDiff;
-            const elimsDiff = b.elims - a.elims;
-            if (elimsDiff !== 0) return elimsDiff;
-            const slotA = savedSlots[a.name] ?? 9999;
-            const slotB = savedSlots[b.name] ?? 9999;
-            if (slotA !== slotB) return slotA - slotB;
+
+            // 4. Stable sort by name
             return a.name.localeCompare(b.name);
         });
     }, [validPlayers]);
