@@ -204,7 +204,28 @@ export default function LiveMatchControl() {
     const [selectedTargetMatch, setSelectedTargetMatch] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [agentMatchId, setAgentMatchId] = useState('pmtm-s4-match-1');
+    const [remoteActiveMatchId, setRemoteActiveMatchId] = useState<string | null>(null);
     const [liveTournamentId, setLiveTournamentId] = useState<string | null>(null);
+
+    // Synchronize UI with Backend Active Match state periodically
+    useEffect(() => {
+        const syncActiveMatch = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/agent/active-match`);
+                const data = await res.json();
+                if (data.matchId !== remoteActiveMatchId) {
+                    setRemoteActiveMatchId(data.matchId);
+                    if (data.matchId) {
+                        setAgentMatchId(data.matchId);
+                        localStorage.setItem('strymx_agent_match_id', data.matchId);
+                    }
+                }
+            } catch {}
+        };
+        const interval = setInterval(syncActiveMatch, 5000);
+        syncActiveMatch(); // Immediate check
+        return () => clearInterval(interval);
+    }, [remoteActiveMatchId]);
 
     useEffect(() => {
         const savedAgentId = localStorage.getItem('strymx_agent_match_id');
@@ -271,8 +292,16 @@ export default function LiveMatchControl() {
             const incomingMatchId = data.matchId;
 
             if (incomingMatchId && incomingMatchId !== expectedMatchId) {
-                console.warn(`[STRYMX-WS] ⛔ REJECTED update from match "${incomingMatchId}" (expected: "${expectedMatchId}"). This data belongs to a different match.`);
-                return; // DISCARD — wrong match
+                // If the remote active match on backend is the one incoming, auto-sync local dashboard
+                if (remoteActiveMatchId && incomingMatchId === remoteActiveMatchId) {
+                    localStorage.setItem('strymx_agent_match_id', incomingMatchId);
+                    setAgentMatchId(incomingMatchId);
+                    console.log(`[STRYMX-WS] 🔄 Auto-synced dashboard to active match: ${incomingMatchId}`);
+                } else {
+                    // Silently ignore if it's just old data still in flight, only warn if it persists
+                    // console.warn(`[STRYMX-WS] ⛔ REJECTED update from match "${incomingMatchId}" (expected: "${expectedMatchId}")`);
+                    return; 
+                }
             }
 
             if (!data.activePlayers || data.activePlayers.length === 0) {
@@ -568,6 +597,50 @@ export default function LiveMatchControl() {
     };
 
 
+    const handleStartConnector = async () => {
+        if (!agentMatchId) return showNotification("Please enter or select a Match ID.", 'error');
+        
+        try {
+            const res = await fetch(`${API_URL}/api/agent/active-match`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId: agentMatchId, reset: true })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setRemoteActiveMatchId(agentMatchId);
+                localStorage.setItem('strymx_agent_match_id', agentMatchId);
+                showNotification(`Connector started for: ${agentMatchId}`, 'success');
+                
+                // Also trigger a reset on the backend for this match ID to clear old data
+                fetch(`${API_URL}/api/agent/reset`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ matchId: agentMatchId })
+                }).catch(() => {});
+            }
+        } catch {
+            showNotification("Failed to start connector.", 'error');
+        }
+    };
+
+    const handleStopConnector = async () => {
+        try {
+            const res = await fetch(`${API_URL}/api/agent/active-match`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId: null })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setRemoteActiveMatchId(null);
+                showNotification("Connector stopped.", "info");
+            }
+        } catch {
+            showNotification("Failed to stop connector.", 'error');
+        }
+    };
+
     const handleSaveToMatch = async () => {
         if (!selectedTargetMatch) return showNotification("Please select a target match.", 'error');
         setIsSaving(true);
@@ -783,6 +856,85 @@ export default function LiveMatchControl() {
                     >
                         <Palette size={14} className="group-hover:rotate-12 transition-transform" /> Live Customize
                     </button>
+                </div>
+            </div>
+
+            {/* CONNECTOR CONTROL PANEL */}
+            <div className="bg-slate-900/60 border border-slate-800/50 rounded-3xl p-6 mb-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 opacity-20 group-hover:opacity-100 transition-opacity"></div>
+                <div className="flex flex-wrap items-center justify-between gap-6 relative z-10">
+                    <div className="flex items-center gap-6">
+                        <div className={cn(
+                            "w-16 h-16 rounded-2xl flex items-center justify-center relative",
+                            remoteActiveMatchId ? "bg-emerald-500/10 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]" : "bg-slate-800 text-slate-500"
+                        )}>
+                            <Radio className={cn("w-8 h-8", remoteActiveMatchId && "animate-pulse")} />
+                            {remoteActiveMatchId && (
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
+                                </span>
+                            )}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <h3 className="text-xl font-black text-white uppercase tracking-tighter">Connector Control</h3>
+                                <div className={cn(
+                                    "px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.2em] border",
+                                    remoteActiveMatchId 
+                                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" 
+                                        : "bg-slate-800 border-slate-700 text-slate-500"
+                                )}>
+                                    {remoteActiveMatchId ? 'Data Flowing' : 'Idle'}
+                                </div>
+                            </div>
+                            <p className="text-xs text-slate-500 font-bold mt-1">Target Match: <span className="text-slate-300 italic">{remoteActiveMatchId || 'None'}</span></p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 flex-1 max-w-xl">
+                        <div className="flex flex-col flex-1 gap-2">
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Select Match to Stream</span>
+                            <div className="relative group/input">
+                                <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-emerald-500 transition-colors" size={18} />
+                                <select 
+                                    value={agentMatchId}
+                                    onChange={(e) => setAgentMatchId(e.target.value)}
+                                    className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-4 pl-12 pr-10 text-sm font-bold text-white focus:outline-none focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
+                                >
+                                    <option value="">-- Choose a Scheduled Match --</option>
+                                    {scheduledMatches.map(m => (
+                                        <option key={m.id} value={m.id}>
+                                            {m.matchName || m.id} ({m.tournament?.name || 'Tournament'})
+                                        </option>
+                                    ))}
+                                    <option value="custom">-- Custom Match ID --</option>
+                                </select>
+                                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none group-focus-within/input:rotate-90 transition-transform" size={16} />
+                            </div>
+                        </div>
+
+                        {!remoteActiveMatchId ? (
+                            <button
+                                onClick={handleStartConnector}
+                                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.5)] hover:-translate-y-1 flex items-center gap-3 mt-5"
+                            >
+                                <Zap size={20} fill="currentColor" /> Start Live Stream
+                            </button>
+                        ) : (
+                            <button
+                                onClick={async () => {
+                                    // 1. Save data first
+                                    await handleSaveToMatch();
+                                    // 2. Then stop connector
+                                    await handleStopConnector();
+                                }}
+                                className="bg-rose-500 hover:bg-rose-400 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(244,63,94,0.3)] hover:shadow-[0_15px_40px_rgba(244,63,94,0.5)] hover:-translate-y-1 flex items-center gap-3 mt-5"
+                            >
+                                <CheckCircle size={20} /> End Match & Save
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
