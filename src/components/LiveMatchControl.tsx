@@ -895,8 +895,40 @@ export default function LiveMatchControl() {
                     </div>
 
                     <div className="flex items-center gap-4 flex-1 max-w-xl">
-                        <div className="flex flex-col flex-1 gap-2">
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Select Match to Stream</span>
+                        <div className="flex flex-col flex-1 gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="flex-1 relative group/tourn">
+                                    <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/tourn:text-indigo-400 transition-colors" size={16} />
+                                    <select 
+                                        value={selectedTournament}
+                                        onChange={e => {
+                                            setSelectedTournament(e.target.value);
+                                            setSelectedStage('');
+                                        }}
+                                        className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3 pl-12 pr-10 text-[11px] font-black uppercase tracking-wider text-white focus:outline-none focus:border-indigo-500/50 transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="">Filter By Tournament</option>
+                                        {tournaments.map(t => (
+                                            <option key={t.id} value={t.id}>{t.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {selectedTournament && (
+                                    <button
+                                        onClick={toggleLive}
+                                        className={cn(
+                                            "px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shrink-0 flex items-center gap-2 border shadow-lg",
+                                            liveTournamentId === selectedTournament
+                                                ? "bg-emerald-500 border-emerald-400 text-white shadow-emerald-500/20 animate-pulse"
+                                                : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
+                                        )}
+                                    >
+                                        <div className={cn("w-2 h-2 rounded-full", liveTournamentId === selectedTournament ? "bg-white" : "bg-slate-500")} />
+                                        {liveTournamentId === selectedTournament ? "Live Sync Active" : "Set Live Context"}
+                                    </button>
+                                )}
+                            </div>
+
                             <div className="relative group/input">
                                 <Layers className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-emerald-500 transition-colors" size={18} />
                                 <select 
@@ -911,6 +943,7 @@ export default function LiveMatchControl() {
                                     <option value="">-- Choose a Scheduled Match --</option>
                                     {scheduledMatches
                                         .filter(m => m.status !== 'COMPLETED')
+                                        .filter(m => !selectedTournament || m.tournamentId === selectedTournament)
                                         .map(m => (
                                             <option key={m.id} value={m.id}>
                                                 {m.matchName || m.id} ({m.tournament?.name || 'Tournament'})
@@ -1021,169 +1054,6 @@ export default function LiveMatchControl() {
 
             {/* Backup Setup Modal moved to fragment root (outside motion.div) */}
 
-            {/* Sticky Match Context Bar */}
-            <div className="sticky top-4 z-[90] mb-8">
-                <div className="glass-dark border border-slate-700/50 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-3 min-h-[64px]">
-                    <div className="flex items-center gap-3 flex-1 overflow-x-auto no-scrollbar">
-                        {/* Status Badge */}
-                        <div className="flex items-center gap-2 px-3 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl shrink-0">
-                            <div className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                            </div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-100/80">Context</span>
-                        </div>
-
-                        {/* Breadcrumb Flow */}
-                        <div className="flex items-center gap-2 flex-1">
-                        {/* Agent ID Input */}
-                        <div className="relative group min-w-[140px]">
-                            <Activity size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-pink-400 transition-colors z-10" />
-                            <input 
-                                type="text"
-                                placeholder="Agent ID"
-                                title="This must match the Match ID you entered in the Connector agent"
-                                value={agentMatchId}
-                                onChange={(e) => {
-                                    setAgentMatchId(e.target.value);
-                                    localStorage.setItem('strymx_agent_match_id', e.target.value);
-                                }}
-                                className="w-full bg-slate-950/40 border border-slate-800/60 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-pink-500/50 focus:bg-slate-900/60 transition-all font-bold placeholder:text-slate-700"
-                            />
-                        </div>
-
-                        {/* Tournament Selector */}
-                            <div className="relative group min-w-[180px]">
-                                <Trophy size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors z-10" />
-                                <select 
-                                    value={selectedTournament}
-                                    onChange={e => {
-                                        setSelectedTournament(e.target.value);
-                                        setSelectedStage('');
-                                        setSelectedTargetMatch('');
-                                    }}
-                                    className="w-full bg-slate-950/40 border border-slate-800/60 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:bg-slate-900/60 transition-all font-bold appearance-none cursor-pointer hover:border-slate-700"
-                                >
-                                    <option value="">Select Tournament</option>
-                                    {tournaments.map(t => (
-                                        <option key={t.id || `tournament-${t.name}`} value={t.id}>{t.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {selectedTournament && (
-                                <button
-                                    onClick={toggleLive}
-                                    className={cn(
-                                        "px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shrink-0 flex items-center gap-2",
-                                        liveTournamentId === selectedTournament
-                                            ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] animate-pulse"
-                                            : "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
-                                    )}
-                                >
-                                    <div className={cn("w-2 h-2 rounded-full", liveTournamentId === selectedTournament ? "bg-white" : "bg-slate-500")} />
-                                    {liveTournamentId === selectedTournament ? "LIVE" : "GO LIVE"}
-                                </button>
-                            )}
-
-                            <AnimatePresence mode="popLayout">
-                                {!!selectedTournament && (
-                                    <motion.div 
-                                        key="stage-selector"
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -10 }}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <ChevronRight size={14} className="text-slate-600 shrink-0" />
-                                        
-                                        {/* Stage Selector */}
-                                        <div className="relative group min-w-[160px]">
-                                            <Layers size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors z-10" />
-                                            <select 
-                                                value={selectedStage}
-                                                onChange={e => {
-                                                    setSelectedStage(e.target.value);
-                                                    setSelectedTargetMatch('');
-                                                }}
-                                                className="w-full bg-slate-950/40 border border-slate-800/60 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:bg-slate-900/60 transition-all font-bold appearance-none cursor-pointer hover:border-slate-700"
-                                            >
-                                                <option value="">Select Stage</option>
-                                                {tournaments.find(t => t.id === selectedTournament)?.stages?.map((s: any, sIdx: number) => (
-                                                    <option key={s.id || `stage-${s.name}-${sIdx}`} value={s.id}>{s.name} ({s.type})</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </motion.div>
-                                )}
-
-                                {!!selectedStage && (
-                                    <motion.div 
-                                        key="match-selector"
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -10 }}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <ChevronRight size={14} className="text-slate-600 shrink-0" />
-                                        
-                                        {/* Match Selector */}
-                                        <div className="relative group min-w-[200px]">
-                                            <Flame size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors z-10" />
-                                            <select 
-                                                value={selectedTargetMatch}
-                                                onChange={e => setSelectedTargetMatch(e.target.value)}
-                                                className="w-full bg-slate-950/40 border border-slate-800/60 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500/50 focus:bg-slate-900/60 transition-all font-bold appearance-none cursor-pointer hover:border-slate-700"
-                                            >
-                                                <option value="">Select Match</option>
-                                                {scheduledMatches
-                                                    .filter(m => m.tournamentId === selectedTournament && m.stageId === selectedStage && m.status !== 'COMPLETED')
-                                                    .sort((a, b) => (a.dayNumber - b.dayNumber) || (a.matchNumber - b.matchNumber))
-                                                    .map((m, mIdx) => (
-                                                        <option key={m.id || `match-${m.matchName}-${mIdx}`} value={m.id}>
-                                                            Day {m.dayNumber} {m.matchName} - {m.mapName}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 shrink-0">
-                        <AnimatePresence>
-                            {!!selectedTargetMatch && (
-                                <motion.button
-                                    key="push-data-button"
-                                    initial={{ opacity: 0, scale: 0.9, x: 20 }}
-                                    animate={{ 
-                                        opacity: 1, 
-                                        scale: 1, 
-                                        x: 0,
-                                        boxShadow: ["0 0 20px rgba(99,102,241,0.2)", "0 0 40px rgba(99,102,241,0.4)", "0 0 20px rgba(99,102,241,0.2)"] 
-                                    }}
-                                    exit={{ opacity: 0, scale: 0.9, x: 20 }}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    transition={{ 
-                                        boxShadow: { repeat: Infinity, duration: 2, ease: "easeInOut" },
-                                        default: { type: "spring", stiffness: 400, damping: 25 }
-                                    }}
-                                    onClick={handleSaveToMatch}
-                                    disabled={isSaving}
-                                    className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 bg-[length:200%_auto] hover:bg-right text-white px-6 py-2.5 rounded-xl font-black transition-all flex items-center gap-2 uppercase tracking-wider text-[10px] disabled:opacity-50 relative overflow-hidden group"
-                                >
-                                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    {isSaving ? <Activity className="animate-spin w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-                                    <span className="relative">Push Live Data to DB</span>
-                                </motion.button>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
                 {[
