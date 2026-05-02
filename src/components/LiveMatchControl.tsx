@@ -662,7 +662,7 @@ export default function LiveMatchControl() {
         setIsSaving(true);
         const backendUrl = WS_URL;
         try {
-            const res = await fetch(`${backendUrl}/api/matches/${selectedTargetMatch}/save-live-data`, {
+            const res = await fetch(`${backendUrl}/api/matches/${targetId}/save-live-data`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sourceMatchId: agentMatchId })
