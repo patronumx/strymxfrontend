@@ -234,16 +234,18 @@ export default function LiveMatchControl() {
     }, []);
 
 
-    const toggleLive = () => {
-        if (!selectedTournament) return;
-        if (liveTournamentId === selectedTournament) {
+    const handleSyncLiveContext = (id?: string) => {
+        const targetId = id || selectedTournament;
+        if (!targetId) return;
+
+        if (liveTournamentId === targetId && !id) {
             localStorage.removeItem('strymx_active_tournament_id');
             setLiveTournamentId(null);
             showNotification("Tournament live sync deactivated", "info");
         } else {
-            localStorage.setItem('strymx_active_tournament_id', selectedTournament);
-            setLiveTournamentId(selectedTournament);
-            showNotification(`Tournament live sync active: ${tournaments.find(t => t.id === selectedTournament)?.name}`, "success");
+            localStorage.setItem('strymx_active_tournament_id', targetId);
+            setLiveTournamentId(targetId);
+            showNotification(`Tournament live sync active: ${tournaments.find(t => t.id === targetId)?.name}`, "success");
         }
     };
 
