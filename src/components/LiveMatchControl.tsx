@@ -666,13 +666,6 @@ export default function LiveMatchControl() {
         }
 
         // 2. Check if match is actually finished (has a winner)
-        const hasWinner = validPlayers.some(p => p.rank === 1);
-        const teamsAlive = teamRankings.filter(t => t.placement === null || t.placement === undefined).length;
-        
-        if (!hasWinner && teamsAlive > 1) {
-            return showNotification("Match is still in progress! Wait for a Chicken Dinner before saving.", 'info');
-        }
-
         setIsSaving(true);
         const backendUrl = WS_URL;
         try {
